@@ -23,8 +23,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.2273818585550305 0.535009668880067 0.8136720129173063 0.962702904644285
-  position -2.5139820321580384 -2.482143632419032 2.0180551275381045
+  orientation -0.13757055187382777 0.8697381332873773 0.4739513928272803 0.6442259695402414
+  position -2.7005938957177036 -1.057251756737315 1.8303974116965678
 }
 TexturedBackground {
 }
@@ -41,9 +41,9 @@ DEF OBST1 Solid {
   children [
     Shape {
       appearance PBRAppearance {
-        baseColor 0.6 0.6 0.6
-        roughness 1
-        metalness 0
+        baseColor 0.2 0.2 0.3
+        roughness 0.8
+        metalness 0.2
       }
       geometry Box {
         size 0.25 0.1 0.25
@@ -60,9 +60,9 @@ DEF OBST2 Solid {
   children [
     Shape {
       appearance PBRAppearance {
-        baseColor 0.5 0.5 0.5
-        roughness 1
-        metalness 0
+        baseColor 0.3 0.15 0.4
+        roughness 0.8
+        metalness 0.2
       }
       geometry Box {
         size 0.18 0.1 0.3
@@ -79,9 +79,9 @@ DEF OBST3 Solid {
   children [
     Shape {
       appearance PBRAppearance {
-        baseColor 0.55 0.55 0.55
-        roughness 1
-        metalness 0
+        baseColor 0.15 0.3 0.35
+        roughness 0.8
+        metalness 0.2
       }
       geometry Box {
         size 0.3 0.1 0.18
@@ -91,6 +91,410 @@ DEF OBST3 Solid {
   name "obst3"
   boundingObject Box {
     size 0.3 0.1 0.18
+  }
+}
+# ========== PILARES DECORATIVOS ==========
+DEF PILLAR_1 Solid {
+  translation 0.6 0.6 0.075
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.1 0.4 0.8
+        roughness 0.5
+        metalness 0.3
+      }
+      geometry Cylinder {
+        height 0.15
+        radius 0.04
+      }
+    }
+  ]
+  name "pillar_1"
+  boundingObject Cylinder {
+    height 0.15
+    radius 0.04
+  }
+}
+DEF PILLAR_2 Solid {
+  translation -0.6 0.6 0.075
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.1 0.7 0.4
+        roughness 0.5
+        metalness 0.3
+      }
+      geometry Cylinder {
+        height 0.15
+        radius 0.04
+      }
+    }
+  ]
+  name "pillar_2"
+  boundingObject Cylinder {
+    height 0.15
+    radius 0.04
+  }
+}
+DEF PILLAR_3 Solid {
+  translation 0.6 -0.6 0.075
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.6 0.1 0.6
+        roughness 0.5
+        metalness 0.3
+      }
+      geometry Cylinder {
+        height 0.15
+        radius 0.04
+      }
+    }
+  ]
+  name "pillar_3"
+  boundingObject Cylinder {
+    height 0.15
+    radius 0.04
+  }
+}
+DEF PILLAR_4 Solid {
+  translation -0.6 -0.6 0.075
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.1 0.7 0.7
+        roughness 0.5
+        metalness 0.3
+      }
+      geometry Cylinder {
+        height 0.15
+        radius 0.04
+      }
+    }
+  ]
+  name "pillar_4"
+  boundingObject Cylinder {
+    height 0.15
+    radius 0.04
+  }
+}
+# ========== CONOS DE SEÑALIZACIÓN ==========
+DEF CONE_1 Solid {
+  translation 0.3 0.3 0.04
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.5 0
+        roughness 0.7
+        metalness 0
+      }
+      geometry Cone {
+        bottomRadius 0.03
+        height 0.08
+      }
+    }
+  ]
+  name "cone_1"
+  boundingObject Cylinder {
+    height 0.08
+    radius 0.03
+  }
+}
+DEF CONE_2 Solid {
+  translation -0.3 0.3 0.04
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.8 0
+        roughness 0.7
+        metalness 0
+      }
+      geometry Cone {
+        bottomRadius 0.03
+        height 0.08
+      }
+    }
+  ]
+  name "cone_2"
+  boundingObject Cylinder {
+    height 0.08
+    radius 0.03
+  }
+}
+DEF CONE_3 Solid {
+  translation 0.3 -0.3 0.04
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.5 0
+        roughness 0.7
+        metalness 0
+      }
+      geometry Cone {
+        bottomRadius 0.03
+        height 0.08
+      }
+    }
+  ]
+  name "cone_3"
+  boundingObject Cylinder {
+    height 0.08
+    radius 0.03
+  }
+}
+DEF CONE_4 Solid {
+  translation -0.3 -0.3 0.04
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.8 0
+        roughness 0.7
+        metalness 0
+      }
+      geometry Cone {
+        bottomRadius 0.03
+        height 0.08
+      }
+    }
+  ]
+  name "cone_4"
+  boundingObject Cylinder {
+    height 0.08
+    radius 0.03
+  }
+}
+DEF CONE_5 Solid {
+  translation 0 0.5 0.04
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.5 0
+        roughness 0.7
+        metalness 0
+      }
+      geometry Cone {
+        bottomRadius 0.03
+        height 0.08
+      }
+    }
+  ]
+  name "cone_5"
+  boundingObject Cylinder {
+    height 0.08
+    radius 0.03
+  }
+}
+DEF CONE_6 Solid {
+  translation 0 -0.5 0.04
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 1 0.8 0
+        roughness 0.7
+        metalness 0
+      }
+      geometry Cone {
+        bottomRadius 0.03
+        height 0.08
+      }
+    }
+  ]
+  name "cone_6"
+  boundingObject Cylinder {
+    height 0.08
+    radius 0.03
+  }
+}
+# ========== MUROS DEL LABERINTO ==========
+DEF WALL_1 Solid {
+  translation 0 0.25 0.04
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.25 0.25 0.3
+        roughness 0.9
+        metalness 0.1
+      }
+      geometry Box {
+        size 0.5 0.02 0.08
+      }
+    }
+  ]
+  name "wall_1"
+  boundingObject Box {
+    size 0.5 0.02 0.08
+  }
+}
+DEF WALL_2 Solid {
+  translation -0.25 0.15 0.04
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.25 0.25 0.3
+        roughness 0.9
+        metalness 0.1
+      }
+      geometry Box {
+        size 0.02 0.22 0.08
+      }
+    }
+  ]
+  name "wall_2"
+  boundingObject Box {
+    size 0.02 0.22 0.08
+  }
+}
+DEF WALL_3 Solid {
+  translation 0.25 0.15 0.04
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.25 0.25 0.3
+        roughness 0.9
+        metalness 0.1
+      }
+      geometry Box {
+        size 0.02 0.22 0.08
+      }
+    }
+  ]
+  name "wall_3"
+  boundingObject Box {
+    size 0.02 0.22 0.08
+  }
+}
+DEF WALL_4 Solid {
+  translation -0.35 -0.1 0.04
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.25 0.25 0.3
+        roughness 0.9
+        metalness 0.1
+      }
+      geometry Box {
+        size 0.3 0.02 0.08
+      }
+    }
+  ]
+  name "wall_4"
+  boundingObject Box {
+    size 0.3 0.02 0.08
+  }
+}
+DEF WALL_5 Solid {
+  translation 0.35 -0.1 0.04
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.25 0.25 0.3
+        roughness 0.9
+        metalness 0.1
+      }
+      geometry Box {
+        size 0.3 0.02 0.08
+      }
+    }
+  ]
+  name "wall_5"
+  boundingObject Box {
+    size 0.3 0.02 0.08
+  }
+}
+DEF WALL_6 Solid {
+  translation -0.5 -0.2 0.04
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.25 0.25 0.3
+        roughness 0.9
+        metalness 0.1
+      }
+      geometry Box {
+        size 0.02 0.2 0.08
+      }
+    }
+  ]
+  name "wall_6"
+  boundingObject Box {
+    size 0.02 0.2 0.08
+  }
+}
+DEF WALL_7 Solid {
+  translation 0.5 -0.2 0.04
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.25 0.25 0.3
+        roughness 0.9
+        metalness 0.1
+      }
+      geometry Box {
+        size 0.02 0.2 0.08
+      }
+    }
+  ]
+  name "wall_7"
+  boundingObject Box {
+    size 0.02 0.2 0.08
+  }
+}
+DEF WALL_8 Solid {
+  translation 0 -0.2 0.04
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.25 0.25 0.3
+        roughness 0.9
+        metalness 0.1
+      }
+      geometry Box {
+        size 0.15 0.02 0.08
+      }
+    }
+  ]
+  name "wall_8"
+  boundingObject Box {
+    size 0.15 0.02 0.08
+  }
+}
+# ========== BARRERAS DECORATIVAS ==========
+DEF BARRIER_1 Solid {
+  translation 0.2 -0.45 0.03
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.8 0.1 0.1
+        roughness 0.6
+        metalness 0.4
+      }
+      geometry Box {
+        size 0.2 0.015 0.06
+      }
+    }
+  ]
+  name "barrier_1"
+  boundingObject Box {
+    size 0.2 0.015 0.06
+  }
+}
+DEF BARRIER_2 Solid {
+  translation -0.2 -0.45 0.03
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.8 0.1 0.1
+        roughness 0.6
+        metalness 0.4
+      }
+      geometry Box {
+        size 0.2 0.015 0.06
+      }
+    }
+  ]
+  name "barrier_2"
+  boundingObject Box {
+    size 0.2 0.015 0.06
   }
 }
 DEF SUPERVISOR Robot {
@@ -105,8 +509,8 @@ DEF SUPERVISOR Robot {
   supervisor TRUE
 }
 DEF CHASER_1 Robot {
-  translation -0.444532 0.556237 0.00988189
-  rotation -0.0017160107745573653 -0.024739811166831372 -0.9996924512321033 -3.1202253071795862
+  translation 0.077068 0.575372 -0.0001048
+  rotation -0.01761519930955717 -0.008817339654396815 0.9998059608117486 -3.1285653071795863
   children [
     GPS {
     }
@@ -151,7 +555,7 @@ DEF CHASER_1 Robot {
     }
     HingeJoint {
       jointParameters HingeJointParameters {
-        position 4.320104222132812
+        position -21.867389161691275
         anchor 0.045 0 0.025
       }
       device [
@@ -161,7 +565,7 @@ DEF CHASER_1 Robot {
       ]
       endPoint Solid {
         translation 0.035 0 0.025
-        rotation 0.6392845445720442 -0.427349435200207 0.6392868927996086 3.9493079108654974
+        rotation 0.7064278296537464 -0.043769587767448194 0.7064304245128215 3.229075670519324
         children [
           DEF Wheel Shape {
             appearance PBRAppearance {
@@ -182,7 +586,7 @@ DEF CHASER_1 Robot {
     }
     HingeJoint {
       jointParameters HingeJointParameters {
-        position 4.595757782173015
+        position -15.561976242725585
         anchor -0.045 0 0.025
       }
       device [
@@ -192,7 +596,7 @@ DEF CHASER_1 Robot {
       ]
       endPoint Solid {
         translation -0.035 0 0.025
-        rotation 0.5985193115797426 -0.5324909723667322 0.59852151006797 4.120192164910551
+        rotation -0.7061621406068141 0.05163718559653266 -0.7061647344899569 3.0384103043891737
         children [
           USE Wheel
         ]
@@ -236,8 +640,8 @@ DEF CHASER_1 Robot {
   controller "chaser_controller"
 }
 DEF CHASER_2 Robot {
-  translation 0.011120062179808344 0.6001213790913859 -0.00013858490526767742
-  rotation -2.7433247579621328e-05 -0.01954811238879624 0.9998089170183728 -3.139898666767748
+  translation 0.504366 0.545258 5.9371e-05
+  rotation -0.005998579248628039 -0.023025797115827328 0.9997168747771433 3.12288
   children [
     GPS {
     }
@@ -282,7 +686,7 @@ DEF CHASER_2 Robot {
     }
     HingeJoint {
       jointParameters HingeJointParameters {
-        position 0.056812302136962936
+        position -79.39880670178741
         anchor 0.045 0 0.025
       }
       device [
@@ -291,8 +695,8 @@ DEF CHASER_2 Robot {
         }
       ]
       endPoint Solid {
-        translation 0.0363321 -4.77585e-05 0.0255567
-        rotation 0.002132682487499047 0.9999955875622312 -0.0020679752115759387 1.6266525086562116
+        translation 0.0363321 -0.0004123996389976401 0.02462300888329184
+        rotation -0.647282750858177 -0.33837847856606157 -0.6830263872536615 3.7559018163505717
         children [
           DEF Wheel Shape {
             appearance PBRAppearance {
@@ -313,7 +717,7 @@ DEF CHASER_2 Robot {
     }
     HingeJoint {
       jointParameters HingeJointParameters {
-        position 0.05681589441903451
+        position -69.67790729186751
         anchor -0.045 0 0.025
       }
       device [
@@ -322,8 +726,8 @@ DEF CHASER_2 Robot {
         }
       ]
       endPoint Solid {
-        translation -0.0363357 -3.50545e-05 0.0255729
-        rotation 0.004807221672282981 0.999979858691149 -0.0041440115616528305 1.5138766841958995
+        translation -0.0363357 0.0003041915409851543 0.02548673476798286
+        rotation 0.3032216090811218 -0.906331707873325 0.2943118942375203 4.673799611427248
         children [
           USE Wheel
         ]
@@ -365,12 +769,10 @@ DEF CHASER_2 Robot {
     density 800
   }
   controller "chaser_controller"
-  linearVelocity 0.001672551927734139 -6.955380191935784e-05 6.517330586737274e-07
-  angularVelocity -2.419841011675936e-05 -0.00040925578501106036 3.390479913975713
 }
 DEF CHASER_3 Robot {
-  translation 0.5711200621798075 0.5993853790913861 -0.00013858490526767742
-  rotation -2.743324758004506e-05 -0.01954811238879666 0.9998089170183728 -3.1398986667677513
+  translation -0.402643 0.591443 -0.00144652
+  rotation 0.0016592500824197884 -0.01758190087334427 0.9998440496651685 3.03078
   children [
     GPS {
     }
@@ -415,7 +817,7 @@ DEF CHASER_3 Robot {
     }
     HingeJoint {
       jointParameters HingeJointParameters {
-        position 0.05681230213696051
+        position -25.849073586656495
         anchor 0.045 0 0.025
       }
       device [
@@ -424,8 +826,8 @@ DEF CHASER_3 Robot {
         }
       ]
       endPoint Solid {
-        translation 0.0363321 -4.77585e-05 0.0255567
-        rotation 0.002132682487501504 0.9999955875622311 -0.0020679752115733813 1.6266525086562094
+        translation 0.0363321 0.00035461174787989247 0.02543179424797908
+        rotation -0.3341679034891233 0.8722257463780162 -0.357147112032278 1.760476696112313
         children [
           DEF Wheel Shape {
             appearance PBRAppearance {
@@ -446,7 +848,7 @@ DEF CHASER_3 Robot {
     }
     HingeJoint {
       jointParameters HingeJointParameters {
-        position 0.0568158944190299
+        position -36.63940371472295
         anchor -0.045 0 0.025
       }
       device [
@@ -455,8 +857,8 @@ DEF CHASER_3 Robot {
         }
       ]
       endPoint Solid {
-        translation -0.0363357 -3.50545e-05 0.0255729
-        rotation 0.004807221672281941 0.999979858691149 -0.004144011561653399 1.513876684195904
+        translation -0.0363357 -0.0005018266042660367 0.025278591613694792
+        rotation 0.45650346069734954 0.781952176626626 0.42444715082118906 1.7633480731792102
         children [
           USE Wheel
         ]
@@ -498,12 +900,10 @@ DEF CHASER_3 Robot {
     density 800
   }
   controller "chaser_controller"
-  linearVelocity 0.0016725519277339274 -6.95538019187462e-05 6.51733058270115e-07
-  angularVelocity -2.4198410117396872e-05 -0.00040925578500100243 3.3904799139756983
 }
 DEF TARGET Robot {
-  translation 0.04944548333744828 -0.5295686959430634 -0.00013859324465102796
-  rotation -0.34384633580397833 0.019015403419295064 -0.9388333780746078 0.11359155958418062
+  translation 0.0271449 -0.656409 -0.00157668
+  rotation 0.28544292651803155 -0.9582787533089715 -0.014972196145686782 0.0503268
   children [
     GPS {
     }
@@ -548,7 +948,7 @@ DEF TARGET Robot {
     }
     HingeJoint {
       jointParameters HingeJointParameters {
-        position 0.21491219090633223
+        position -29.18939567570327
         anchor 0.045 0 0.025
       }
       device [
@@ -557,8 +957,8 @@ DEF TARGET Robot {
         }
       ]
       endPoint Solid {
-        translation 0.0363342 -3.36813e-05 0.0255573
-        rotation 0.09880990609478742 0.9899166370106233 0.10149706511578194 1.6371601725911062
+        translation 0.0363342 -0.0004896514775537931 0.024731747972050393
+        rotation -0.6464854017943215 -0.34062147283356264 -0.6826665639325902 3.7612249846579977
         children [
           DEF Wheel Shape {
             appearance PBRAppearance {
@@ -579,7 +979,7 @@ DEF TARGET Robot {
     }
     HingeJoint {
       jointParameters HingeJointParameters {
-        position -0.21421846070797143
+        position -33.703400829012736
         anchor -0.045 0 0.025
       }
       device [
@@ -588,8 +988,8 @@ DEF TARGET Robot {
         }
       ]
       endPoint Solid {
-        translation -0.0363335 -4.59456e-05 0.0255722
-        rotation -0.10480192174320946 0.9887952434669414 -0.10630392135797428 1.5241589983469574
+        translation -0.0363335 0.0005236031114438404 0.024764705249005238
+        rotation 0.6926988617216246 -0.29873714820397534 0.656448324891245 3.763620847115301
         children [
           USE Wheel
         ]
@@ -631,6 +1031,4 @@ DEF TARGET Robot {
     density 800
   }
   controller "target_controller"
-  linearVelocity 0.0016654501181570585 -6.866316258579163e-05 -2.7610253885929935e-07
-  angularVelocity -1.6078732412448714e-05 -0.0004068936432725344 -3.3893214409270365
 }
