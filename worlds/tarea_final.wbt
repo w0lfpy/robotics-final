@@ -1,0 +1,636 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
+
+WorldInfo {
+  contactProperties [
+    ContactProperties {
+      material1 "wheel"
+      coulombFriction [
+        0.8
+      ]
+      bounce 0
+    }
+    ContactProperties {
+      material1 "caster"
+      coulombFriction [
+        0.05
+      ]
+      bounce 0
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.2273818585550305 0.535009668880067 0.8136720129173063 0.962702904644285
+  position -2.5139820321580384 -2.482143632419032 2.0180551275381045
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 1.6 1.6
+  floorTileSize 0.2 0.2
+  wallThickness 0.02
+  wallHeight 0.15
+}
+DEF OBST1 Solid {
+  translation 0 0.05 0.12
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.6 0.6 0.6
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 0.25 0.1 0.25
+      }
+    }
+  ]
+  name "obst1"
+  boundingObject Box {
+    size 0.25 0.1 0.25
+  }
+}
+DEF OBST2 Solid {
+  translation 0.5 0.05 0.15
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.5 0.5 0.5
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 0.18 0.1 0.3
+      }
+    }
+  ]
+  name "obst2"
+  boundingObject Box {
+    size 0.18 0.1 0.3
+  }
+}
+DEF OBST3 Solid {
+  translation -0.45 0.05 0.1
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.55 0.55 0.55
+        roughness 1
+        metalness 0
+      }
+      geometry Box {
+        size 0.3 0.1 0.18
+      }
+    }
+  ]
+  name "obst3"
+  boundingObject Box {
+    size 0.3 0.1 0.18
+  }
+}
+DEF SUPERVISOR Robot {
+  children [
+    Emitter {
+      name "super_emitter"
+      channel 1
+    }
+  ]
+  name "SUPERVISOR"
+  controller "game_supervisor"
+  supervisor TRUE
+}
+DEF CHASER_1 Robot {
+  translation -0.444532 0.556237 0.00988189
+  rotation -0.0017160107745573653 -0.024739811166831372 -0.9996924512321033 -3.1202253071795862
+  children [
+    GPS {
+    }
+    Compass {
+    }
+    Receiver {
+      channel 1
+    }
+    DistanceSensor {
+      translation 0.035 0.015 0.03
+      name "ds_left"
+      lookupTable [
+        0 1000 0
+        0.25 0 0
+      ]
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation 0.035 -0.015 0.03
+      name "ds_right"
+      lookupTable [
+        0 1000 0
+        0.25 0 0
+      ]
+      type "infra-red"
+    }
+    DEF Body Pose {
+      translation 0 0 0.0415
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0 0 1
+            roughness 1
+            metalness 0
+          }
+          geometry Cylinder {
+            height 0.08
+            radius 0.035
+          }
+        }
+      ]
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 4.320104222132812
+        anchor 0.045 0 0.025
+      }
+      device [
+        RotationalMotor {
+          name "motor_1"
+        }
+      ]
+      endPoint Solid {
+        translation 0.035 0 0.025
+        rotation 0.6392845445720442 -0.427349435200207 0.6392868927996086 3.9493079108654974
+        children [
+          DEF Wheel Shape {
+            appearance PBRAppearance {
+              baseColor 1 0 0
+              roughness 1
+              metalness 0
+            }
+            geometry Cylinder {
+              height 0.01
+              radius 0.025
+            }
+          }
+        ]
+        boundingObject USE Wheel
+        physics DEF Wheel_Physics Physics {
+        }
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 4.595757782173015
+        anchor -0.045 0 0.025
+      }
+      device [
+        RotationalMotor {
+          name "motor_2"
+        }
+      ]
+      endPoint Solid {
+        translation -0.035 0 0.025
+        rotation 0.5985193115797426 -0.5324909723667322 0.59852151006797 4.120192164910551
+        children [
+          USE Wheel
+        ]
+        name "solid(1)"
+        boundingObject USE Wheel
+        physics USE Wheel_Physics
+      }
+    }
+    Solid {
+      translation 0.015 0.035 0.07
+      children [
+        DEF Eye Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            roughness 1
+            metalness 0
+          }
+          geometry Box {
+            size 0.005 0.005 0.005
+          }
+        }
+      ]
+      name "solid(2)"
+      boundingObject USE Eye
+      physics Physics {
+      }
+    }
+    Solid {
+      translation -0.015 0.035 0.07
+      children [
+        USE Eye
+      ]
+      name "solid(3)"
+    }
+  ]
+  name "CHASER_1"
+  boundingObject USE Body
+  physics Physics {
+    density 800
+  }
+  controller "chaser_controller"
+}
+DEF CHASER_2 Robot {
+  translation 0.011120062179808344 0.6001213790913859 -0.00013858490526767742
+  rotation -2.7433247579621328e-05 -0.01954811238879624 0.9998089170183728 -3.139898666767748
+  children [
+    GPS {
+    }
+    Compass {
+    }
+    Receiver {
+      channel 1
+    }
+    DistanceSensor {
+      translation 0.035 0.015 0.03
+      name "ds_left"
+      lookupTable [
+        0 1000 0
+        0.25 0 0
+      ]
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation 0.035 -0.015 0.03
+      name "ds_right"
+      lookupTable [
+        0 1000 0
+        0.25 0 0
+      ]
+      type "infra-red"
+    }
+    DEF Body Pose {
+      translation 0 0 0.0415
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0 0 1
+            roughness 1
+            metalness 0
+          }
+          geometry Cylinder {
+            height 0.08
+            radius 0.035
+          }
+        }
+      ]
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 0.056812302136962936
+        anchor 0.045 0 0.025
+      }
+      device [
+        RotationalMotor {
+          name "motor_1"
+        }
+      ]
+      endPoint Solid {
+        translation 0.0363321 -4.77585e-05 0.0255567
+        rotation 0.002132682487499047 0.9999955875622312 -0.0020679752115759387 1.6266525086562116
+        children [
+          DEF Wheel Shape {
+            appearance PBRAppearance {
+              baseColor 1 0 0
+              roughness 1
+              metalness 0
+            }
+            geometry Cylinder {
+              height 0.01
+              radius 0.025
+            }
+          }
+        ]
+        boundingObject USE Wheel
+        physics DEF Wheel_Physics Physics {
+        }
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 0.05681589441903451
+        anchor -0.045 0 0.025
+      }
+      device [
+        RotationalMotor {
+          name "motor_2"
+        }
+      ]
+      endPoint Solid {
+        translation -0.0363357 -3.50545e-05 0.0255729
+        rotation 0.004807221672282981 0.999979858691149 -0.0041440115616528305 1.5138766841958995
+        children [
+          USE Wheel
+        ]
+        name "solid(1)"
+        boundingObject USE Wheel
+        physics USE Wheel_Physics
+      }
+    }
+    Solid {
+      translation 0.015 0.035 0.07
+      children [
+        DEF Eye Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            roughness 1
+            metalness 0
+          }
+          geometry Box {
+            size 0.005 0.005 0.005
+          }
+        }
+      ]
+      name "solid(2)"
+      boundingObject USE Eye
+      physics Physics {
+      }
+    }
+    Solid {
+      translation -0.015 0.035 0.07
+      children [
+        USE Eye
+      ]
+      name "solid(3)"
+    }
+  ]
+  name "CHASER_2"
+  boundingObject USE Body
+  physics Physics {
+    density 800
+  }
+  controller "chaser_controller"
+  linearVelocity 0.001672551927734139 -6.955380191935784e-05 6.517330586737274e-07
+  angularVelocity -2.419841011675936e-05 -0.00040925578501106036 3.390479913975713
+}
+DEF CHASER_3 Robot {
+  translation 0.5711200621798075 0.5993853790913861 -0.00013858490526767742
+  rotation -2.743324758004506e-05 -0.01954811238879666 0.9998089170183728 -3.1398986667677513
+  children [
+    GPS {
+    }
+    Compass {
+    }
+    Receiver {
+      channel 1
+    }
+    DistanceSensor {
+      translation 0.035 0.015 0.03
+      name "ds_left"
+      lookupTable [
+        0 1000 0
+        0.25 0 0
+      ]
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation 0.035 -0.015 0.03
+      name "ds_right"
+      lookupTable [
+        0 1000 0
+        0.25 0 0
+      ]
+      type "infra-red"
+    }
+    DEF Body Pose {
+      translation 0 0 0.0415
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0 0 1
+            roughness 1
+            metalness 0
+          }
+          geometry Cylinder {
+            height 0.08
+            radius 0.035
+          }
+        }
+      ]
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 0.05681230213696051
+        anchor 0.045 0 0.025
+      }
+      device [
+        RotationalMotor {
+          name "motor_1"
+        }
+      ]
+      endPoint Solid {
+        translation 0.0363321 -4.77585e-05 0.0255567
+        rotation 0.002132682487501504 0.9999955875622311 -0.0020679752115733813 1.6266525086562094
+        children [
+          DEF Wheel Shape {
+            appearance PBRAppearance {
+              baseColor 1 0 0
+              roughness 1
+              metalness 0
+            }
+            geometry Cylinder {
+              height 0.01
+              radius 0.025
+            }
+          }
+        ]
+        boundingObject USE Wheel
+        physics DEF Wheel_Physics Physics {
+        }
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 0.0568158944190299
+        anchor -0.045 0 0.025
+      }
+      device [
+        RotationalMotor {
+          name "motor_2"
+        }
+      ]
+      endPoint Solid {
+        translation -0.0363357 -3.50545e-05 0.0255729
+        rotation 0.004807221672281941 0.999979858691149 -0.004144011561653399 1.513876684195904
+        children [
+          USE Wheel
+        ]
+        name "solid(1)"
+        boundingObject USE Wheel
+        physics USE Wheel_Physics
+      }
+    }
+    Solid {
+      translation 0.015 0.035 0.07
+      children [
+        DEF Eye Shape {
+          appearance PBRAppearance {
+            baseColor 1 0 0
+            roughness 1
+            metalness 0
+          }
+          geometry Box {
+            size 0.005 0.005 0.005
+          }
+        }
+      ]
+      name "solid(2)"
+      boundingObject USE Eye
+      physics Physics {
+      }
+    }
+    Solid {
+      translation -0.015 0.035 0.07
+      children [
+        USE Eye
+      ]
+      name "solid(3)"
+    }
+  ]
+  name "CHASER_3"
+  boundingObject USE Body
+  physics Physics {
+    density 800
+  }
+  controller "chaser_controller"
+  linearVelocity 0.0016725519277339274 -6.95538019187462e-05 6.51733058270115e-07
+  angularVelocity -2.4198410117396872e-05 -0.00040925578500100243 3.3904799139756983
+}
+DEF TARGET Robot {
+  translation 0.04944548333744828 -0.5295686959430634 -0.00013859324465102796
+  rotation -0.34384633580397833 0.019015403419295064 -0.9388333780746078 0.11359155958418062
+  children [
+    GPS {
+    }
+    Compass {
+    }
+    Receiver {
+      channel 1
+    }
+    DistanceSensor {
+      translation 0.035 0.015 0.03
+      name "ds_left"
+      lookupTable [
+        0 1000 0
+        0.25 0 0
+      ]
+      type "infra-red"
+    }
+    DistanceSensor {
+      translation 0.035 -0.015 0.03
+      name "ds_right"
+      lookupTable [
+        0 1000 0
+        0.25 0 0
+      ]
+      type "infra-red"
+    }
+    DEF Body Pose {
+      translation 0 0 0.0415
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.666667 0 0
+            roughness 1
+            metalness 0
+          }
+          geometry Cylinder {
+            height 0.08
+            radius 0.035
+          }
+        }
+      ]
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position 0.21491219090633223
+        anchor 0.045 0 0.025
+      }
+      device [
+        RotationalMotor {
+          name "motor_1"
+        }
+      ]
+      endPoint Solid {
+        translation 0.0363342 -3.36813e-05 0.0255573
+        rotation 0.09880990609478742 0.9899166370106233 0.10149706511578194 1.6371601725911062
+        children [
+          DEF Wheel Shape {
+            appearance PBRAppearance {
+              baseColor 0 0 0
+              roughness 1
+              metalness 0
+            }
+            geometry Cylinder {
+              height 0.01
+              radius 0.025
+            }
+          }
+        ]
+        boundingObject USE Wheel
+        physics DEF Wheel_Physics Physics {
+        }
+      }
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        position -0.21421846070797143
+        anchor -0.045 0 0.025
+      }
+      device [
+        RotationalMotor {
+          name "motor_2"
+        }
+      ]
+      endPoint Solid {
+        translation -0.0363335 -4.59456e-05 0.0255722
+        rotation -0.10480192174320946 0.9887952434669414 -0.10630392135797428 1.5241589983469574
+        children [
+          USE Wheel
+        ]
+        name "solid(1)"
+        boundingObject USE Wheel
+        physics USE Wheel_Physics
+      }
+    }
+    Solid {
+      translation 0.015 0.035 0.07
+      children [
+        DEF Eye Shape {
+          appearance PBRAppearance {
+            baseColor 0 0 0
+            roughness 1
+            metalness 0
+          }
+          geometry Box {
+            size 0.005 0.005 0.005
+          }
+        }
+      ]
+      name "solid(2)"
+      boundingObject USE Eye
+      physics Physics {
+      }
+    }
+    Solid {
+      translation -0.015 0.035 0.07
+      children [
+        USE Eye
+      ]
+      name "solid(3)"
+    }
+  ]
+  name "TARGET"
+  boundingObject USE Body
+  physics Physics {
+    density 800
+  }
+  controller "target_controller"
+  linearVelocity 0.0016654501181570585 -6.866316258579163e-05 -2.7610253885929935e-07
+  angularVelocity -1.6078732412448714e-05 -0.0004068936432725344 -3.3893214409270365
+}
