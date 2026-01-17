@@ -45,7 +45,7 @@ step_count = 0
 bonus_time = 0.0
 
 print("=" * 40)
-print("PILLA-PILLA - HUNTER (Rojo) vs RUNNERS (Azul)")
+print("PILLA-PILLA - HUNTER (Dorado) vs RUNNERS (Gris)")
 print(f"Tiempo: {int(GAME_DURATION)}s (+{int(TIME_BONUS)}s por captura)")
 print("=" * 40)
 
@@ -153,13 +153,13 @@ while supervisor.step(TIME_STEP) != -1:
     # 5. Condiciones Victoria
     if score >= 3:
         game_over = True
-        print("¡¡¡ HUNTER (ROJO) GANA !!!")
+        print("¡¡¡ HUNTER (Dorado) GANA !!!")
         update_display(remaining, score, True, "HUNTER")
         supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_PAUSE)
     
     elif remaining <= 0:
         game_over = True
-        print("¡¡¡ RUNNERS (AZULES) GANAN !!!")
+        print("¡¡¡ RUNNERS (Gris) GANAN !!!")
         update_display(remaining, score, True, "RUNNERS")
         supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_PAUSE)
     
