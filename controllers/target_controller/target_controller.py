@@ -1,46 +1,39 @@
+"""
+Runner Controller (AZUL) - Huye del ROJO
+=========================================
+Con detección de bloqueo por posición
+"""
+
 from controller import Robot
 import math
+import random
 
 TIME_STEP = 32
+MAX_SPEED = 5.0
+BASE_SPEED = 4.0
 
-# ===== PARÁMETROS =====
-MAX_SPEED = 8.0
-BASE_SPEED = 5.0
-TURN_GAIN = 4.0
-
-AVOID_THRESHOLD = 120.0
-KP_WALL = 0.02
-
-# ===== UTILIDADES =====
-def clamp(x, lo, hi):
-    return max(lo, min(hi, x))
 
 def norm_angle(a):
-    while a > math.pi:
-        a -= 2 * math.pi
-    while a < -math.pi:
-        a += 2 * math.pi
+    while a > math.pi: a -= 2*math.pi
+    while a < -math.pi: a += 2*math.pi
     return a
 
-def normalize_speeds(lv, rv, max_speed):
-    m = max(abs(lv), abs(rv))
-    if m < 1e-6:
-        return 0.0, 0.0
-    scale = max_speed / m
-    return lv * scale, rv * scale
 
 def recv_latest(receiver):
     latest = None
     while receiver.getQueueLength() > 0:
-        if hasattr(receiver, "getString"):
+        try:
             latest = receiver.getString()
-        else:
-            latest = receiver.getData().decode("utf-8", errors="ignore")
+        except:
+            pass
         receiver.nextPacket()
     return latest
 
-# ===== INIT ROBOT =====
+
+# ===== INIT =====
 robot = Robot()
+robot_name = robot.getName()
+print(f"[AZUL] {robot_name}")
 
 left_motor = robot.getDevice("motor_1")
 right_motor = robot.getDevice("motor_2")
@@ -52,83 +45,146 @@ compass = robot.getDevice("compass")
 gps.enable(TIME_STEP)
 compass.enable(TIME_STEP)
 
-ds_left = robot.getDevice("ds_left")
-ds_right = robot.getDevice("ds_right")
-ds_left.enable(TIME_STEP)
-ds_right.enable(TIME_STEP)
+# Sensores - intentar nuevos nombres, si no existen usar antiguos
+ds_fl = robot.getDevice("ds_front_left") or robot.getDevice("ds_left")
+ds_fr = robot.getDevice("ds_front_right") or robot.getDevice("ds_right")
+if ds_fl: ds_fl.enable(TIME_STEP)
+if ds_fr: ds_fr.enable(TIME_STEP)
 
 receiver = robot.getDevice("receiver")
 receiver.enable(TIME_STEP)
 
-# ===== ESTADO =====
-STATE_ESCAPE = 0
-STATE_WALL = 1
-state = STATE_ESCAPE
+chaser_pos = None
+captured = False
 
-chasers = []
+# Para detección de bloqueo
+last_positions = []
+STUCK_CHECK_SIZE = 20
+escape_counter = 0
+escape_direction = 1
+
+for _ in range(15):
+    robot.step(TIME_STEP)
+
 
 # ===== LOOP =====
 while robot.step(TIME_STEP) != -1:
-
-    vL = ds_left.getValue()
-    vR = ds_right.getValue()
-
-    # ===== DETECTAR OBSTÁCULO =====
-    if state == STATE_ESCAPE and (vL > AVOID_THRESHOLD or vR > AVOID_THRESHOLD):
-        state = STATE_WALL
-
-    # ===== WALL FOLLOWING =====
-    if state == STATE_WALL:
-        error = vL - vR
-        turn = KP_WALL * error
-
-        lv = BASE_SPEED - turn
-        rv = BASE_SPEED + turn
-        lv, rv = normalize_speeds(lv, rv, MAX_SPEED)
-
-        left_motor.setVelocity(-lv)
-        right_motor.setVelocity(-rv)
-
-        if vL < 60 and vR < 60:
-            state = STATE_ESCAPE
+    
+    if captured:
+        left_motor.setVelocity(0)
+        right_motor.setVelocity(0)
         continue
-
-    # ===== RECIBIR CHASERS =====
-    msg = recv_latest(receiver)
-    if msg:
-        chasers = []
-        for part in msg.split(";"):
-            p = part.split(",")
-            if len(p) == 3:
-                try:
-                    chasers.append((float(p[0]), float(p[1]), float(p[2])))
-                except ValueError:
-                    pass
-
-    if not chasers:
-        left_motor.setVelocity(-BASE_SPEED)
-        right_motor.setVelocity(-BASE_SPEED)
-        continue
-
+    
     pos = gps.getValues()
     north = compass.getValues()
+    
+    fl = ds_fl.getValue() if ds_fl else 0
+    fr = ds_fr.getValue() if ds_fr else 0
+    front_max = max(fl, fr)
+    
+    # Guardar posición para detección de bloqueo
+    last_positions.append((pos[0], pos[1]))
+    if len(last_positions) > STUCK_CHECK_SIZE:
+        last_positions.pop(0)
+    
+    # Detectar si está atascado (no se movió significativamente)
+    is_stuck = False
+    if len(last_positions) >= STUCK_CHECK_SIZE:
+        old = last_positions[0]
+        dist = math.sqrt((pos[0]-old[0])**2 + (pos[1]-old[1])**2)
+        is_stuck = dist < 0.02  # Menos de 2cm en 20 pasos
+    
+    # Mensajes
+    msg = recv_latest(receiver)
+    if msg:
+        if msg.startswith("CAPTURED:") and msg.split(":")[1] == robot_name:
+            captured = True
+            continue
+        elif not msg.startswith("CAPTURED"):
+            coords = msg.split(",")
+            if len(coords) == 3:
+                try:
+                    chaser_pos = (float(coords[0]), float(coords[1]), float(coords[2]))
+                except:
+                    pass
+    
+    # ===== OBSTÁCULO FRONTAL -> GIRAR =====
+    
+    # Panic: Pegado a la pared (>950) -> Retroceder
+    if front_max > 950:
+         left_motor.setVelocity(MAX_SPEED) # Positive = Back
+         right_motor.setVelocity(MAX_SPEED)
+         continue
 
-    cx, cy, cz = min(
-        chasers,
-        key=lambda c: (c[0] - pos[0])**2 + (c[2] - pos[2])**2
-    )
+    # Critical: Pivot in place (> 500)
+    if front_max > 500:
+        # Romper simetría: Si son parecidos, girar siempre a la izquierda
+        if abs(fl - fr) < 50:
+             # Giro forzado izquierda (motores: izq=+MAX, der=-MAX)
+             left_motor.setVelocity(MAX_SPEED) 
+             right_motor.setVelocity(-MAX_SPEED)
+        elif fl > fr:
+            # Obstáculo izq -> girar derecha
+            left_motor.setVelocity(-MAX_SPEED)
+            right_motor.setVelocity(MAX_SPEED)
+        else:
+            # Obstáculo der -> girar izquierda
+            left_motor.setVelocity(MAX_SPEED)
+            right_motor.setVelocity(-MAX_SPEED)
+        continue
+    
+    # Warning: Gentle turn
+    elif front_max > 80:
+        if fl > fr:
+            left_motor.setVelocity(-BASE_SPEED)
+            right_motor.setVelocity(0) # Stop inner wheel for tighter turn
+        else:
+            left_motor.setVelocity(0)
+            right_motor.setVelocity(-BASE_SPEED)
+        continue
 
-    dx = pos[0] - cx
-    dz = pos[2] - cz
-
-    heading = math.atan2(north[0], north[2])
-    desired = math.atan2(dx, dz)
-
-    turn = TURN_GAIN * norm_angle(desired - heading)
-
-    lv = BASE_SPEED + turn
-    rv = BASE_SPEED - turn
-    lv, rv = normalize_speeds(lv, rv, MAX_SPEED)
-
-    left_motor.setVelocity(-lv)
-    right_motor.setVelocity(-rv)
+    # ===== MODO ESCAPE (cuando está atascado) =====
+    if escape_counter > 0:
+        escape_counter -= 1
+        # Fase 1: Retroceder más tiempo para despegarse
+        if escape_counter > 20: 
+            left_motor.setVelocity(MAX_SPEED)
+            right_motor.setVelocity(MAX_SPEED)
+        # Fase 2: Girar aleatoriamente
+        else:
+            left_motor.setVelocity(-MAX_SPEED * escape_direction)
+            right_motor.setVelocity(MAX_SPEED * escape_direction)
+        continue
+    
+    # Iniciar escape si está atascado
+    # Importante: No activar escape solo por sensor alto (eso lo maneja obstacle avoidance arriba)
+    # Solo si realmente no nos movemos (is_stuck)
+    if is_stuck:
+        escape_counter = 40 # Aumentado tiempo de escape
+        escape_direction = random.choice([-1, 1])
+        last_positions.clear()
+        continue
+    
+    # ===== HUIR DEL ROJO =====
+    if chaser_pos is not None:
+        heading = math.atan2(north[0], north[1])
+        dx = pos[0] - chaser_pos[0]
+        dy = pos[1] - chaser_pos[1]
+        escape_angle = math.atan2(dx, dy)
+        
+        error = norm_angle(escape_angle - heading)
+        turn = 3.0 * error
+        
+        lv = BASE_SPEED + turn
+        rv = BASE_SPEED - turn
+        
+        m = max(abs(lv), abs(rv))
+        if m > MAX_SPEED:
+            lv = lv / m * MAX_SPEED
+            rv = rv / m * MAX_SPEED
+        
+        left_motor.setVelocity(-lv)
+        right_motor.setVelocity(-rv)
+    else:
+        left_motor.setVelocity(-BASE_SPEED)
+        right_motor.setVelocity(-BASE_SPEED)

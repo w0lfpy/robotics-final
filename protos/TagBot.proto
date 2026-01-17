@@ -1,158 +1,128 @@
 #VRML_SIM R2025a utf8
 
 PROTO TagBot [
-  field SFVec3f    translation 0 0.025 0
-  field SFRotation rotation    0 1 0 0
+  field SFVec3f    translation 0 0 0
+  field SFRotation rotation    0 0 1 0
   field SFString   name        "TagBot"
-  field SFString   controller  "chaser_controller"
+  field SFString   controller  "target_controller"
   field SFColor    bodyColor   0 0 1
+  field SFColor    wheelColor  1 0 0
+  field SFInt32    channel     1
 ]
 {
   Robot {
     translation IS translation
     rotation IS rotation
-    name IS name
-    controller IS controller
-
     children [
-      # ===== Cuerpo (cilindro azul) =====
-      Transform {
-        translation 0 0.05 0
+      GPS { }
+      Compass { }
+      Receiver {
+        channel IS channel
+      }
+      DistanceSensor {
+        translation 0.04 0.02 0.03
+        rotation 0 0 1 1.5708
+        name "ds_front_left"
+        lookupTable [ 0 1000 0, 0.2 0 0 ]
+        type "infra-red"
+      }
+      DistanceSensor {
+        translation 0.04 -0.02 0.03
+        rotation 0 0 1 1.5708
+        name "ds_front_right"
+        lookupTable [ 0 1000 0, 0.2 0 0 ]
+        type "infra-red"
+      }
+      DEF Body Pose {
+        translation 0 0 0.0415
         children [
           Shape {
             appearance PBRAppearance {
               baseColor IS bodyColor
-              roughness 0.6
+              roughness 1
               metalness 0
             }
             geometry Cylinder {
-              radius 0.035
               height 0.08
+              radius 0.035
             }
           }
         ]
       }
-
-      # ===== Rueda izquierda (roja) =====
-      # Centro rueda a y=0.025 (radio=0.025) => toca suelo
       HingeJoint {
         jointParameters HingeJointParameters {
-          anchor -0.045 0.025 0
-          axis 1 0 0
+          position 0
+          anchor 0.045 0 0.025
         }
         device [
           RotationalMotor {
             name "motor_1"
-            maxVelocity 20
-            maxTorque 8
           }
         ]
         endPoint Solid {
-          name "left_wheel"
-          translation -0.045 0.025 0
-          rotation 0 0 1 1.5708
+          translation 0.035 0 0.025
+          rotation 0 0 1 1.57
           children [
-            Shape {
+            DEF Wheel Shape {
               appearance PBRAppearance {
-                baseColor 1 0 0
-                roughness 0.9
+                baseColor IS wheelColor
+                roughness 1
                 metalness 0
               }
               geometry Cylinder {
-                radius 0.025
                 height 0.01
+                radius 0.025
               }
             }
           ]
-          boundingObject Cylinder {
-            radius 0.025
-            height 0.01
-          }
-          physics Physics { density 900 }
-          contactMaterial "wheel"
+          name "left_wheel"
+          boundingObject USE Wheel
+          physics DEF Wheel_Physics Physics { }
         }
       }
-
-      # ===== Rueda derecha (roja) =====
       HingeJoint {
         jointParameters HingeJointParameters {
-          anchor 0.045 0.025 0
-          axis 1 0 0
+          position 0
+          anchor -0.045 0 0.025
         }
         device [
           RotationalMotor {
             name "motor_2"
-            maxVelocity 20
-            maxTorque 8
           }
         ]
         endPoint Solid {
-          name "right_wheel"
-          translation 0.045 0.025 0
-          rotation 0 0 1 1.5708
+          translation -0.035 0 0.025
+          rotation 0 0 1 1.57
           children [
-            Shape {
-              appearance PBRAppearance {
-                baseColor 1 0 0
-                roughness 0.9
-                metalness 0
-              }
-              geometry Cylinder {
-                radius 0.025
-                height 0.01
-              }
-            }
+            USE Wheel
           ]
-          boundingObject Cylinder {
-            radius 0.025
-            height 0.01
-          }
-          physics Physics { density 900 }
-          contactMaterial "wheel"
+          name "right_wheel"
+          boundingObject USE Wheel
+          physics USE Wheel_Physics
         }
       }
-
-      # ===== Caster trasero (negro) =====
       Solid {
-        name "caster"
-        translation 0 0.008 -0.03
+        translation 0 0.035 0.07
         children [
-          Shape {
-            appearance PBRAppearance { baseColor 0.05 0.05 0.05 roughness 0.9 }
-            geometry Sphere { radius 0.008 }
+          DEF Eye Shape {
+            appearance PBRAppearance {
+              baseColor 0 0 0
+            }
+            geometry Box {
+              size 0.005 0.005 0.005
+            }
           }
         ]
-        boundingObject Sphere { radius 0.008 }
-        physics Physics { density 900 }
-        contactMaterial "caster"
-      }
-
-      # ===== Sensores para perseguir/evitar =====
-      GPS { name "gps" }
-      Compass { name "compass" }
-      Receiver { name "receiver" channel 1 }
-
-      DistanceSensor {
-        name "ds_left"
-        translation 0.04 0.06 0.03
-        lookupTable [ 0 1000 0, 0.25 0 0 ]
-        type "infra-red"
-      }
-      DistanceSensor {
-        name "ds_right"
-        translation 0.04 0.06 -0.03
-        lookupTable [ 0 1000 0, 0.25 0 0 ]
-        type "infra-red"
+        name "eye"
+        boundingObject USE Eye
+        physics Physics { }
       }
     ]
-
-    # colisión principal: solo el cuerpo, levantado
-    boundingObject Transform {
-      translation 0 0.05 0
-      children [
-        Cylinder { radius 0.035 height 0.08 }
-      ]
+    name IS name
+    boundingObject USE Body
+    physics Physics {
+      density 800
     }
-    physics Physics { density 900 }
+    controller IS controller
   }
 }
