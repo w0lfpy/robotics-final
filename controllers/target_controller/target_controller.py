@@ -1,5 +1,5 @@
 """
-Runner Controller (AZUL) - State Machine & Odometry
+Runner Controller (Gris) - State Machine & Odometry
 """
 
 from controller import Robot

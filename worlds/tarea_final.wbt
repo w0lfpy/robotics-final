@@ -3,7 +3,6 @@
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
-EXTERNPROTO "../protos/TagBot.proto"
 
 WorldInfo {
   contactProperties [
@@ -24,8 +23,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.3105482119411665 0.3644701076892358 -0.8779073690664302 1.540909592396322
-  position -0.9063509356099049 2.798984948952225 2.386180098342007
+  orientation 0.5112165150203658 -0.5262513239755131 -0.6794977695213218 4.362348718381025
+  position 0.3831971932609709 -1.1981793501009346 2.918134222024846
 }
 TexturedBackground {
 }
@@ -37,7 +36,7 @@ RectangleArena {
   floorAppearance PBRAppearance {
     baseColorMap ImageTexture {
       url [
-        "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/default/worlds/textures/grass.jpg"
+        "../textures/floor_arena.jpg"
       ]
     }
     roughness 0.8
@@ -46,7 +45,11 @@ RectangleArena {
   wallThickness 0.02
   wallHeight 0.15
   wallAppearance PBRAppearance {
-    baseColor 0.3 0.15 0.1
+    baseColorMap ImageTexture {
+      url [
+        "../textures/wall_perimeter.jpg"
+      ]
+    }
     roughness 0.9
     metalness 0
   }
@@ -56,9 +59,13 @@ DEF PILLAR_1 Solid {
   children [
     Shape {
       appearance PBRAppearance {
-        baseColor 0.1 0.4 0.8
-        roughness 0.5
-        metalness 0.3
+        baseColorMap ImageTexture {
+          url [
+            "../textures/robot_hunter.jpg"
+          ]
+        }
+        roughness 0.3
+        metalness 0.8
       }
       geometry Cylinder {
         height 0.15
@@ -77,9 +84,13 @@ DEF PILLAR_2 Solid {
   children [
     Shape {
       appearance PBRAppearance {
-        baseColor 0.1 0.7 0.4
-        roughness 0.5
-        metalness 0.3
+        baseColorMap ImageTexture {
+          url [
+            "../textures/robot_hunter.jpg"
+          ]
+        }
+        roughness 0.3
+        metalness 0.8
       }
       geometry Cylinder {
         height 0.15
@@ -98,9 +109,13 @@ DEF PILLAR_3 Solid {
   children [
     Shape {
       appearance PBRAppearance {
-        baseColor 0.6 0.1 0.6
-        roughness 0.5
-        metalness 0.3
+        baseColorMap ImageTexture {
+          url [
+            "../textures/robot_hunter.jpg"
+          ]
+        }
+        roughness 0.3
+        metalness 0.8
       }
       geometry Cylinder {
         height 0.15
@@ -119,9 +134,13 @@ DEF PILLAR_4 Solid {
   children [
     Shape {
       appearance PBRAppearance {
-        baseColor 0.1 0.7 0.7
-        roughness 0.5
-        metalness 0.3
+        baseColorMap ImageTexture {
+          url [
+            "../textures/robot_hunter.jpg"
+          ]
+        }
+        roughness 0.3
+        metalness 0.8
       }
       geometry Cylinder {
         height 0.15
@@ -136,13 +155,17 @@ DEF PILLAR_4 Solid {
   }
 }
 DEF WALL_1 Solid {
-  translation 0 0.31 0.04
+  translation -0.04 0.31 0.04
   children [
     Shape {
       appearance PBRAppearance {
-        baseColor 0.25 0.25 0.3
+        baseColorMap ImageTexture {
+          url [
+            "../textures/wall_internal.jpg"
+          ]
+        }
         roughness 0.9
-        metalness 0.1
+        metalness 0
       }
       geometry Box {
         size 0.4 0.02 0.08
@@ -156,12 +179,17 @@ DEF WALL_1 Solid {
 }
 DEF WALL_4 Solid {
   translation -0.35 -0.09 0.04
+  rotation 0 0 1 3.14159
   children [
     Shape {
       appearance PBRAppearance {
-        baseColor 0.25 0.25 0.3
+        baseColorMap ImageTexture {
+          url [
+            "../textures/wall_internal.jpg"
+          ]
+        }
         roughness 0.9
-        metalness 0.1
+        metalness 0
       }
       geometry Box {
         size 0.3 0.02 0.08
@@ -174,13 +202,18 @@ DEF WALL_4 Solid {
   }
 }
 DEF WALL_5 Solid {
-  translation 0.35 -0.09 0.04
+  translation 0.342929 0.0019233 0.04
+  rotation 0 0 1 -1.5707953071795862
   children [
     Shape {
       appearance PBRAppearance {
-        baseColor 0.25 0.25 0.3
+        baseColorMap ImageTexture {
+          url [
+            "../textures/wall_internal.jpg"
+          ]
+        }
         roughness 0.9
-        metalness 0.1
+        metalness 0
       }
       geometry Box {
         size 0.3 0.02 0.08
@@ -194,11 +227,17 @@ DEF WALL_5 Solid {
 }
 Solid {
   translation -0.6 0.6 0.075
+  rotation 0 0 1 0.523599
   children [
     Shape {
       appearance PBRAppearance {
-        baseColor 0.6 0.4 0.2
+        baseColorMap ImageTexture {
+          url [
+            "../textures/crate_wood_brown.jpg"
+          ]
+        }
         roughness 0.9
+        metalness 0
       }
       geometry Box {
         size 0.15 0.15 0.15
@@ -211,12 +250,17 @@ Solid {
   }
 }
 Solid {
-  translation 0.6 -0.6 0.075
+  translation 0.74 -0.6 0.055
   children [
     Shape {
       appearance PBRAppearance {
-        baseColor 0.55 0.35 0.15
+        baseColorMap ImageTexture {
+          url [
+            "../textures/crate_wood_chip.jpg"
+          ]
+        }
         roughness 0.9
+        metalness 0
       }
       geometry Box {
         size 0.12 0.12 0.12
@@ -247,29 +291,50 @@ DEF RUNNER_1 Robot {
   translation -0.45 0.55 0
   rotation 0 0 1 -2.6179953071795863
   children [
-    GPS { }
-    Compass { }
-    Receiver { channel 1 }
+    GPS {
+    }
+    Compass {
+    }
+    Receiver {
+      channel 1
+    }
     DistanceSensor {
       translation 0.04 0.02 0.03
       rotation 0 0 1 1.5708
       name "ds_front_left"
-      lookupTable [ 0 1000 0, 0.2 0 0 ]
+      lookupTable [
+        0 1000 0
+        0.2 0 0
+      ]
       type "infra-red"
     }
     DistanceSensor {
       translation 0.04 -0.02 0.03
       rotation 0 0 1 1.5708
       name "ds_front_right"
-      lookupTable [ 0 1000 0, 0.2 0 0 ]
+      lookupTable [
+        0 1000 0
+        0.2 0 0
+      ]
       type "infra-red"
     }
     DEF Body Pose {
       translation 0 0 0.0415
       children [
         Shape {
-          appearance PBRAppearance { baseColor 0 0 1 roughness 1 metalness 0 }
-          geometry Cylinder { height 0.08 radius 0.035 }
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../textures/robot_runner.jpg"
+              ]
+            }
+            roughness 0.2
+            metalness 0.9
+          }
+          geometry Cylinder {
+            height 0.08
+            radius 0.035
+          }
         }
       ]
     }
@@ -278,19 +343,34 @@ DEF RUNNER_1 Robot {
         position -258.71751625553344
         anchor 0.045 0 0.025
       }
-      device [ RotationalMotor { name "motor_1" } PositionSensor { name "ps_1" } ]
+      device [
+        RotationalMotor {
+          name "motor_1"
+        }
+        PositionSensor {
+          name "ps_1"
+        }
+      ]
       endPoint Solid {
         translation 0.035 0 0.025
-        rotation 0.4652719270027579 -0.7530222291171088 0.4652736360451134 4.432454185701364
+        rotation 0.46527192700275805 -0.7530222291171088 0.46527363604511335 4.432454185701365
         children [
           DEF Wheel Shape {
-            appearance PBRAppearance { baseColor 1 0 0 roughness 1 metalness 0 }
-            geometry Cylinder { height 0.01 radius 0.025 }
+            appearance PBRAppearance {
+              baseColor 0.15 0.15 0.15
+              roughness 0.95
+              metalness 0.1
+            }
+            geometry Cylinder {
+              height 0.01
+              radius 0.025
+            }
           }
         ]
         name "left_wheel"
         boundingObject USE Wheel
-        physics DEF Wheel_Physics Physics { }
+        physics DEF Wheel_Physics Physics {
+        }
       }
     }
     HingeJoint {
@@ -298,11 +378,20 @@ DEF RUNNER_1 Robot {
         position -167.94171132285467
         anchor -0.045 0 0.025
       }
-      device [ RotationalMotor { name "motor_2" } PositionSensor { name "ps_2" } ]
+      device [
+        RotationalMotor {
+          name "motor_2"
+        }
+        PositionSensor {
+          name "ps_2"
+        }
+      ]
       endPoint Solid {
         translation -0.03499999999999998 0 0.025
-        rotation -0.6013757491139482 -0.5260149806761757 -0.601377958094475 4.110074311573427
-        children [ USE Wheel ]
+        rotation -0.6013757491139483 -0.5260149806761756 -0.6013779580944749 4.110074311573427
+        children [
+          USE Wheel
+        ]
         name "right_wheel"
         boundingObject USE Wheel
         physics USE Wheel_Physics
@@ -312,48 +401,78 @@ DEF RUNNER_1 Robot {
       translation 0 0.035 0.07
       children [
         DEF Eye Shape {
-          appearance PBRAppearance { baseColor 1 0 0 }
-          geometry Box { size 0.005 0.005 0.005 }
+          appearance PBRAppearance {
+            baseColor 0 1 1
+            roughness 0.1
+            metalness 0
+            emissiveColor 0 0.8 0.8
+          }
+          geometry Box {
+            size 0.005 0.005 0.005
+          }
         }
       ]
       name "eye"
       boundingObject USE Eye
-      physics Physics { }
+      physics Physics {
+      }
     }
   ]
   name "RUNNER_1"
   boundingObject USE Body
-  physics Physics { density 800 }
+  physics Physics {
+    density 800
+  }
   controller "target_controller"
 }
-
 DEF RUNNER_2 Robot {
   translation 0.34 0.53 0
   rotation 0 0 1 3.14159
   children [
-    GPS { }
-    Compass { }
-    Receiver { channel 1 }
+    GPS {
+    }
+    Compass {
+    }
+    Receiver {
+      channel 1
+    }
     DistanceSensor {
       translation 0.04 0.02 0.03
       rotation 0 0 1 1.5708
       name "ds_front_left"
-      lookupTable [ 0 1000 0, 0.2 0 0 ]
+      lookupTable [
+        0 1000 0
+        0.2 0 0
+      ]
       type "infra-red"
     }
     DistanceSensor {
       translation 0.04 -0.02 0.03
       rotation 0 0 1 1.5708
       name "ds_front_right"
-      lookupTable [ 0 1000 0, 0.2 0 0 ]
+      lookupTable [
+        0 1000 0
+        0.2 0 0
+      ]
       type "infra-red"
     }
     DEF Body2 Pose {
       translation 0 0 0.0415
       children [
         Shape {
-          appearance PBRAppearance { baseColor 0 0 1 roughness 1 metalness 0 }
-          geometry Cylinder { height 0.08 radius 0.035 }
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../textures/robot_runner.jpg"
+              ]
+            }
+            roughness 0.2
+            metalness 0.9
+          }
+          geometry Cylinder {
+            height 0.08
+            radius 0.035
+          }
         }
       ]
     }
@@ -362,19 +481,34 @@ DEF RUNNER_2 Robot {
         position -310.5527762929109
         anchor 0.045 0 0.025
       }
-      device [ RotationalMotor { name "motor_1" } PositionSensor { name "ps_1" } ]
+      device [
+        RotationalMotor {
+          name "motor_1"
+        }
+        PositionSensor {
+          name "ps_1"
+        }
+      ]
       endPoint Solid {
-        translation 0.0363321 0.00026476393453645966 0.024507967660319954
-        rotation 0.6792794992618482 -0.14721895121550388 0.7189617112792446 3.4240122544096723
+        translation 0.0363321 0.0002647639345364605 0.024507967660319954
+        rotation 0.679279499261848 -0.14721895121550388 0.7189617112792448 3.4240122544096723
         children [
           DEF Wheel2 Shape {
-            appearance PBRAppearance { baseColor 1 0 0 roughness 1 metalness 0 }
-            geometry Cylinder { height 0.01 radius 0.025 }
+            appearance PBRAppearance {
+              baseColor 0.15 0.15 0.15
+              roughness 0.95
+              metalness 0.1
+            }
+            geometry Cylinder {
+              height 0.01
+              radius 0.025
+            }
           }
         ]
         name "left_wheel"
         boundingObject USE Wheel2
-        physics DEF Wheel_Physics2 Physics { }
+        physics DEF Wheel_Physics2 Physics {
+        }
       }
     }
     HingeJoint {
@@ -382,11 +516,20 @@ DEF RUNNER_2 Robot {
         position -361.55405934128834
         anchor -0.045 0 0.025
       }
-      device [ RotationalMotor { name "motor_2" } PositionSensor { name "ps_2" } ]
+      device [
+        RotationalMotor {
+          name "motor_2"
+        }
+        PositionSensor {
+          name "ps_2"
+        }
+      ]
       endPoint Solid {
-        translation -0.0363357 -0.00015121922399320006 0.024446306967476433
-        rotation 0.7225642295872857 0.11559628934795316 0.6815705627518813 2.910423290871665
-        children [ USE Wheel2 ]
+        translation -0.0363357 -0.00015121922399319933 0.024446306967476433
+        rotation 0.7225642295872857 0.11559628934795319 0.6815705627518813 2.910423290871665
+        children [
+          USE Wheel2
+        ]
         name "right_wheel"
         boundingObject USE Wheel2
         physics USE Wheel_Physics2
@@ -396,74 +539,132 @@ DEF RUNNER_2 Robot {
       translation 0 0.035 0.07
       children [
         DEF Eye2 Shape {
-          appearance PBRAppearance { baseColor 1 0 0 }
-          geometry Box { size 0.005 0.005 0.005 }
+          appearance PBRAppearance {
+            baseColor 0 1 1
+            roughness 0.1
+            metalness 0
+            emissiveColor 0 0.8 0.8
+          }
+          geometry Box {
+            size 0.005 0.005 0.005
+          }
         }
       ]
       name "eye"
       boundingObject USE Eye2
-      physics Physics { }
+      physics Physics {
+      }
     }
   ]
   name "RUNNER_2"
   boundingObject USE Body2
-  physics Physics { density 800 }
+  physics Physics {
+    density 800
+  }
   controller "target_controller"
 }
-
 DEF RUNNER_3 Robot {
   translation 0 -0.2 0
   children [
-    GPS { }
-    Compass { }
-    Receiver { channel 1 }
+    GPS {
+    }
+    Compass {
+    }
+    Receiver {
+      channel 1
+    }
     DistanceSensor {
       translation 0.04 0.02 0.03
       rotation 0 0 1 1.5708
       name "ds_front_left"
-      lookupTable [ 0 1000 0, 0.2 0 0 ]
+      lookupTable [
+        0 1000 0
+        0.2 0 0
+      ]
       type "infra-red"
     }
     DistanceSensor {
       translation 0.04 -0.02 0.03
       rotation 0 0 1 1.5708
       name "ds_front_right"
-      lookupTable [ 0 1000 0, 0.2 0 0 ]
+      lookupTable [
+        0 1000 0
+        0.2 0 0
+      ]
       type "infra-red"
     }
     DEF Body3 Pose {
       translation 0 0 0.0415
       children [
         Shape {
-          appearance PBRAppearance { baseColor 0 0 1 roughness 1 metalness 0 }
-          geometry Cylinder { height 0.08 radius 0.035 }
+          appearance PBRAppearance {
+            baseColorMap ImageTexture {
+              url [
+                "../textures/robot_runner.jpg"
+              ]
+            }
+            roughness 0.2
+            metalness 0.9
+          }
+          geometry Cylinder {
+            height 0.08
+            radius 0.035
+          }
         }
       ]
     }
     HingeJoint {
-      jointParameters HingeJointParameters { anchor 0.045 0 0.025 }
-      device [ RotationalMotor { name "motor_1" } PositionSensor { name "ps_1" } ]
+      jointParameters HingeJointParameters {
+        anchor 0.045 0 0.025
+      }
+      device [
+        RotationalMotor {
+          name "motor_1"
+        }
+        PositionSensor {
+          name "ps_1"
+        }
+      ]
       endPoint Solid {
         translation 0.035 0 0.025
-        rotation 0.4652719270027579 -0.7530222291171088 0.4652736360451134 4.432454185701364
+        rotation 0.46527192700275793 -0.7530222291171088 0.4652736360451134 4.432454185701364
         children [
           DEF Wheel3 Shape {
-            appearance PBRAppearance { baseColor 1 0 0 roughness 1 metalness 0 }
-            geometry Cylinder { height 0.01 radius 0.025 }
+            appearance PBRAppearance {
+              baseColor 0.15 0.15 0.15
+              roughness 0.95
+              metalness 0.1
+            }
+            geometry Cylinder {
+              height 0.01
+              radius 0.025
+            }
           }
         ]
         name "left_wheel"
         boundingObject USE Wheel3
-        physics DEF Wheel_Physics3 Physics { }
+        physics DEF Wheel_Physics3 Physics {
+        }
       }
     }
     HingeJoint {
-      jointParameters HingeJointParameters { anchor -0.045 0 0.025 }
-      device [ RotationalMotor { name "motor_2" } PositionSensor { name "ps_2" } ]
+      jointParameters HingeJointParameters {
+        anchor -0.045 0 0.025
+      }
+      device [
+        RotationalMotor {
+          name "motor_2"
+        }
+        PositionSensor {
+          name "ps_2"
+        }
+      ]
       endPoint Solid {
         translation -0.03499999999999998 0 0.025
         rotation -0.6013757491139482 -0.5260149806761757 -0.601377958094475 4.110074311573427
-        children [ USE Wheel3 ]
+        children [
+          USE Wheel3
+        ]
         name "right_wheel"
         boundingObject USE Wheel3
         physics USE Wheel_Physics3
@@ -473,48 +674,79 @@ DEF RUNNER_3 Robot {
       translation 0 0.035 0.07
       children [
         DEF Eye3 Shape {
-          appearance PBRAppearance { baseColor 1 0 0 }
-          geometry Box { size 0.005 0.005 0.005 }
+          appearance PBRAppearance {
+            baseColor 0 1 1
+            roughness 0.1
+            metalness 0
+            emissiveColor 0 0.8 0.8
+          }
+          geometry Box {
+            size 0.005 0.005 0.005
+          }
         }
       ]
       name "eye"
       boundingObject USE Eye3
-      physics Physics { }
+      physics Physics {
+      }
     }
   ]
   name "RUNNER_3"
   boundingObject USE Body3
-  physics Physics { density 800 }
+  physics Physics {
+    density 800
+  }
   controller "target_controller"
 }
-
 DEF HUNTER Robot {
   translation 0 -0.65 0
   rotation 0 0 1 1.57
   children [
-    GPS { }
-    Compass { }
-    Receiver { channel 2 }
+    GPS {
+    }
+    Compass {
+    }
+    Receiver {
+      channel 2
+    }
     DistanceSensor {
       translation 0.04 0.02 0.03
       rotation 0 0 1 1.5708
       name "ds_front_left"
-      lookupTable [ 0 1000 0, 0.2 0 0 ]
+      lookupTable [
+        0 1000 0
+        0.2 0 0
+      ]
       type "infra-red"
     }
     DistanceSensor {
       translation 0.04 -0.02 0.03
       rotation 0 0 1 1.5708
       name "ds_front_right"
-      lookupTable [ 0 1000 0, 0.2 0 0 ]
+      lookupTable [
+        0 1000 0
+        0.2 0 0
+      ]
       type "infra-red"
     }
     DEF BodyRed Pose {
       translation 0 0 0.0415
       children [
         Shape {
-          appearance PBRAppearance { baseColor 0.8 0 0 roughness 1 metalness 0 }
-          geometry Cylinder { height 0.08 radius 0.035 }
+          appearance PBRAppearance {
+            baseColor 0.8 0.6 0.2
+            baseColorMap ImageTexture {
+              url [
+                "../textures/robot_hunter.jpg"
+              ]
+            }
+            roughness 0.3
+            metalness 0.95
+          }
+          geometry Cylinder {
+            height 0.08
+            radius 0.035
+          }
         }
       ]
     }
@@ -523,19 +755,34 @@ DEF HUNTER Robot {
         position -184.04616736222454
         anchor 0.045 0 0.025
       }
-      device [ RotationalMotor { name "motor_1" } PositionSensor { name "ps_1" } ]
+      device [
+        RotationalMotor {
+          name "motor_1"
+        }
+        PositionSensor {
+          name "ps_1"
+        }
+      ]
       endPoint Solid {
-        translation 0.0363342 0.0005103500553320945 0.02477359209158641
-        rotation 0.6009265822801976 -0.48284781346238487 0.6369813433246181 4.00121449134836
+        translation 0.0363342 0.0005103500553320946 0.02477359209158641
+        rotation 0.6009265822801976 -0.4828478134623848 0.6369813433246182 4.00121449134836
         children [
           DEF WheelBlack Shape {
-            appearance PBRAppearance { baseColor 0 0 0 roughness 1 metalness 0 }
-            geometry Cylinder { height 0.01 radius 0.025 }
+            appearance PBRAppearance {
+              baseColor 0.1 0.1 0.1
+              roughness 0.95
+              metalness 0.1
+            }
+            geometry Cylinder {
+              height 0.01
+              radius 0.025
+            }
           }
         ]
         name "left_wheel"
         boundingObject USE WheelBlack
-        physics DEF Wheel_Physics Physics { }
+        physics DEF Wheel_Physics Physics {
+        }
       }
     }
     HingeJoint {
@@ -543,11 +790,20 @@ DEF HUNTER Robot {
         position -199.80999567819015
         anchor -0.045 0 0.025
       }
-      device [ RotationalMotor { name "motor_2" } PositionSensor { name "ps_2" } ]
+      device [
+        RotationalMotor {
+          name "motor_2"
+        }
+        PositionSensor {
+          name "ps_2"
+        }
+      ]
       endPoint Solid {
-        translation -0.0363335 -0.0005738691233189368 0.0250140736441803
-        rotation 0.531027368920317 0.6866876194628824 0.4964574974093604 1.8893827510143555
-        children [ USE WheelBlack ]
+        translation -0.0363335 -0.000573869123318937 0.0250140736441803
+        rotation 0.531027368920317 0.6866876194628824 0.49645749740936046 1.8893827510143557
+        children [
+          USE WheelBlack
+        ]
         name "right_wheel"
         boundingObject USE WheelBlack
         physics USE Wheel_Physics
@@ -557,17 +813,27 @@ DEF HUNTER Robot {
       translation 0 0.035 0.07
       children [
         DEF EyeBlack Shape {
-          appearance PBRAppearance { baseColor 0 0 0 }
-          geometry Box { size 0.005 0.005 0.005 }
+          appearance PBRAppearance {
+            baseColor 1 0.5 0
+            roughness 0.1
+            metalness 0
+            emissiveColor 1 0.4 0
+          }
+          geometry Box {
+            size 0.005 0.005 0.005
+          }
         }
       ]
       name "eye"
       boundingObject USE EyeBlack
-      physics Physics { }
+      physics Physics {
+      }
     }
   ]
   name "HUNTER"
   boundingObject USE BodyRed
-  physics Physics { density 800 }
+  physics Physics {
+    density 800
+  }
   controller "chaser_controller"
 }

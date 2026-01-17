@@ -1,5 +1,5 @@
 """
-Chaser Controller (ROJO) - State Machine & Odometry
+Chaser Controller (Dorado) - State Machine & Odometry
 """
 
 from controller import Robot
