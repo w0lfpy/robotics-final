@@ -278,7 +278,7 @@ DEF RUNNER_1 Robot {
         position -258.71751625553344
         anchor 0.045 0 0.025
       }
-      device [ RotationalMotor { name "motor_1" } ]
+      device [ RotationalMotor { name "motor_1" } PositionSensor { name "ps_1" } ]
       endPoint Solid {
         translation 0.035 0 0.025
         rotation 0.4652719270027579 -0.7530222291171088 0.4652736360451134 4.432454185701364
@@ -298,7 +298,7 @@ DEF RUNNER_1 Robot {
         position -167.94171132285467
         anchor -0.045 0 0.025
       }
-      device [ RotationalMotor { name "motor_2" } ]
+      device [ RotationalMotor { name "motor_2" } PositionSensor { name "ps_2" } ]
       endPoint Solid {
         translation -0.03499999999999998 0 0.025
         rotation -0.6013757491139482 -0.5260149806761757 -0.601377958094475 4.110074311573427
@@ -362,7 +362,7 @@ DEF RUNNER_2 Robot {
         position -310.5527762929109
         anchor 0.045 0 0.025
       }
-      device [ RotationalMotor { name "motor_1" } ]
+      device [ RotationalMotor { name "motor_1" } PositionSensor { name "ps_1" } ]
       endPoint Solid {
         translation 0.0363321 0.00026476393453645966 0.024507967660319954
         rotation 0.6792794992618482 -0.14721895121550388 0.7189617112792446 3.4240122544096723
@@ -382,7 +382,7 @@ DEF RUNNER_2 Robot {
         position -361.55405934128834
         anchor -0.045 0 0.025
       }
-      device [ RotationalMotor { name "motor_2" } ]
+      device [ RotationalMotor { name "motor_2" } PositionSensor { name "ps_2" } ]
       endPoint Solid {
         translation -0.0363357 -0.00015121922399320006 0.024446306967476433
         rotation 0.7225642295872857 0.11559628934795316 0.6815705627518813 2.910423290871665
@@ -442,7 +442,7 @@ DEF RUNNER_3 Robot {
     }
     HingeJoint {
       jointParameters HingeJointParameters { anchor 0.045 0 0.025 }
-      device [ RotationalMotor { name "motor_1" } ]
+      device [ RotationalMotor { name "motor_1" } PositionSensor { name "ps_1" } ]
       endPoint Solid {
         translation 0.035 0 0.025
         rotation 0.4652719270027579 -0.7530222291171088 0.4652736360451134 4.432454185701364
@@ -459,7 +459,7 @@ DEF RUNNER_3 Robot {
     }
     HingeJoint {
       jointParameters HingeJointParameters { anchor -0.045 0 0.025 }
-      device [ RotationalMotor { name "motor_2" } ]
+      device [ RotationalMotor { name "motor_2" } PositionSensor { name "ps_2" } ]
       endPoint Solid {
         translation -0.03499999999999998 0 0.025
         rotation -0.6013757491139482 -0.5260149806761757 -0.601377958094475 4.110074311573427
@@ -523,7 +523,7 @@ DEF HUNTER Robot {
         position -184.04616736222454
         anchor 0.045 0 0.025
       }
-      device [ RotationalMotor { name "motor_1" } ]
+      device [ RotationalMotor { name "motor_1" } PositionSensor { name "ps_1" } ]
       endPoint Solid {
         translation 0.0363342 0.0005103500553320945 0.02477359209158641
         rotation 0.6009265822801976 -0.48284781346238487 0.6369813433246181 4.00121449134836
@@ -543,7 +543,7 @@ DEF HUNTER Robot {
         position -199.80999567819015
         anchor -0.045 0 0.025
       }
-      device [ RotationalMotor { name "motor_2" } ]
+      device [ RotationalMotor { name "motor_2" } PositionSensor { name "ps_2" } ]
       endPoint Solid {
         translation -0.0363335 -0.0005738691233189368 0.0250140736441803
         rotation 0.531027368920317 0.6866876194628824 0.4964574974093604 1.8893827510143555

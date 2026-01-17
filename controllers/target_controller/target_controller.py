@@ -1,7 +1,5 @@
 """
-Runner Controller (AZUL) - Huye del ROJO
-=========================================
-Con detección de bloqueo por posición
+Runner Controller (AZUL) - State Machine & Odometry
 """
 
 from controller import Robot
@@ -9,182 +7,247 @@ import math
 import random
 
 TIME_STEP = 32
-MAX_SPEED = 5.0
-BASE_SPEED = 4.0
+MAX_SPEED = 6.0
+BASE_SPEED = 5.0
 
+R = 0.025
+D = 0.09
 
-def norm_angle(a):
-    while a > math.pi: a -= 2*math.pi
-    while a < -math.pi: a += 2*math.pi
-    return a
+STATE_WANDER = "WANDER"
+STATE_FLEE = "FLEE"
+STATE_AVOID = "AVOID"
+STATE_RECOVERY = "RECOVERY"
 
+class RunnerRobot:
+    def __init__(self):
+        self.robot = Robot()
+        self.name = self.robot.getName()
+        
+        self.left_motor = self.robot.getDevice("motor_1")
+        self.right_motor = self.robot.getDevice("motor_2")
+        self.left_motor.setPosition(float("inf"))
+        self.right_motor.setPosition(float("inf"))
+        self.left_motor.setVelocity(0.0)
+        self.right_motor.setVelocity(0.0)
 
-def recv_latest(receiver):
-    latest = None
-    while receiver.getQueueLength() > 0:
         try:
-            latest = receiver.getString()
+            self.ps_enc_l = self.robot.getDevice("ps_1")
+            self.ps_enc_r = self.robot.getDevice("ps_2")
+            self.ps_enc_l.enable(TIME_STEP)
+            self.ps_enc_r.enable(TIME_STEP)
+            self.odometry_available = True
         except:
-            pass
-        receiver.nextPacket()
-    return latest
+            self.odometry_available = False
 
+        self.ds_fl = self.robot.getDevice("ds_front_left") or self.robot.getDevice("ds_left")
+        self.ds_fr = self.robot.getDevice("ds_front_right") or self.robot.getDevice("ds_right")
+        if self.ds_fl: self.ds_fl.enable(TIME_STEP)
+        if self.ds_fr: self.ds_fr.enable(TIME_STEP)
 
-# ===== INIT =====
-robot = Robot()
-robot_name = robot.getName()
-print(f"[AZUL] {robot_name}")
+        self.gps = self.robot.getDevice("gps")
+        self.compass = self.robot.getDevice("compass")
+        self.gps.enable(TIME_STEP)
+        self.compass.enable(TIME_STEP)
 
-left_motor = robot.getDevice("motor_1")
-right_motor = robot.getDevice("motor_2")
-left_motor.setPosition(float("inf"))
-right_motor.setPosition(float("inf"))
+        self.receiver = self.robot.getDevice("receiver")
+        self.receiver.enable(TIME_STEP)
 
-gps = robot.getDevice("gps")
-compass = robot.getDevice("compass")
-gps.enable(TIME_STEP)
-compass.enable(TIME_STEP)
+        self.current_state = STATE_WANDER
+        self.chaser_pos = None
+        self.captured = False
+        self.stuck_counter = 0
+        self.recovery_timer = 0
+        self.recovery_dir = 1
+        self.avoid_timer = 0
+        self.avoid_turn = 0
+        self.wander_timer = 0
+        self.wander_turn = 0
 
-# Sensores - intentar nuevos nombres, si no existen usar antiguos
-ds_fl = robot.getDevice("ds_front_left") or robot.getDevice("ds_left")
-ds_fr = robot.getDevice("ds_front_right") or robot.getDevice("ds_right")
-if ds_fl: ds_fl.enable(TIME_STEP)
-if ds_fr: ds_fr.enable(TIME_STEP)
-
-receiver = robot.getDevice("receiver")
-receiver.enable(TIME_STEP)
-
-chaser_pos = None
-captured = False
-
-# Para detección de bloqueo
-last_positions = []
-STUCK_CHECK_SIZE = 20
-escape_counter = 0
-escape_direction = 1
-
-for _ in range(15):
-    robot.step(TIME_STEP)
-
-
-# ===== LOOP =====
-while robot.step(TIME_STEP) != -1:
-    
-    if captured:
-        left_motor.setVelocity(0)
-        right_motor.setVelocity(0)
-        continue
-    
-    pos = gps.getValues()
-    north = compass.getValues()
-    
-    fl = ds_fl.getValue() if ds_fl else 0
-    fr = ds_fr.getValue() if ds_fr else 0
-    front_max = max(fl, fr)
-    
-    # Guardar posición para detección de bloqueo
-    last_positions.append((pos[0], pos[1]))
-    if len(last_positions) > STUCK_CHECK_SIZE:
-        last_positions.pop(0)
-    
-    # Detectar si está atascado (no se movió significativamente)
-    is_stuck = False
-    if len(last_positions) >= STUCK_CHECK_SIZE:
-        old = last_positions[0]
-        dist = math.sqrt((pos[0]-old[0])**2 + (pos[1]-old[1])**2)
-        is_stuck = dist < 0.02  # Menos de 2cm en 20 pasos
-    
-    # Mensajes
-    msg = recv_latest(receiver)
-    if msg:
-        if msg.startswith("CAPTURED:") and msg.split(":")[1] == robot_name:
-            captured = True
-            continue
-        elif not msg.startswith("CAPTURED"):
-            coords = msg.split(",")
-            if len(coords) == 3:
-                try:
-                    chaser_pos = (float(coords[0]), float(coords[1]), float(coords[2]))
-                except:
-                    pass
-    
-    # ===== OBSTÁCULO FRONTAL -> GIRAR =====
-    
-    # Panic: Pegado a la pared (>950) -> Retroceder
-    if front_max > 950:
-         left_motor.setVelocity(MAX_SPEED) # Positive = Back
-         right_motor.setVelocity(MAX_SPEED)
-         continue
-
-    # Critical: Pivot in place (> 500)
-    if front_max > 500:
-        # Romper simetría: Si son parecidos, girar siempre a la izquierda
-        if abs(fl - fr) < 50:
-             # Giro forzado izquierda (motores: izq=+MAX, der=-MAX)
-             left_motor.setVelocity(MAX_SPEED) 
-             right_motor.setVelocity(-MAX_SPEED)
-        elif fl > fr:
-            # Obstáculo izq -> girar derecha
-            left_motor.setVelocity(-MAX_SPEED)
-            right_motor.setVelocity(MAX_SPEED)
-        else:
-            # Obstáculo der -> girar izquierda
-            left_motor.setVelocity(MAX_SPEED)
-            right_motor.setVelocity(-MAX_SPEED)
-        continue
-    
-    # Warning: Gentle turn
-    elif front_max > 80:
-        if fl > fr:
-            left_motor.setVelocity(-BASE_SPEED)
-            right_motor.setVelocity(0) # Stop inner wheel for tighter turn
-        else:
-            left_motor.setVelocity(0)
-            right_motor.setVelocity(-BASE_SPEED)
-        continue
-
-    # ===== MODO ESCAPE (cuando está atascado) =====
-    if escape_counter > 0:
-        escape_counter -= 1
-        # Fase 1: Retroceder más tiempo para despegarse
-        if escape_counter > 20: 
-            left_motor.setVelocity(MAX_SPEED)
-            right_motor.setVelocity(MAX_SPEED)
-        # Fase 2: Girar aleatoriamente
-        else:
-            left_motor.setVelocity(-MAX_SPEED * escape_direction)
-            right_motor.setVelocity(MAX_SPEED * escape_direction)
-        continue
-    
-    # Iniciar escape si está atascado
-    # Importante: No activar escape solo por sensor alto (eso lo maneja obstacle avoidance arriba)
-    # Solo si realmente no nos movemos (is_stuck)
-    if is_stuck:
-        escape_counter = 40 # Aumentado tiempo de escape
-        escape_direction = random.choice([-1, 1])
-        last_positions.clear()
-        continue
-    
-    # ===== HUIR DEL ROJO =====
-    if chaser_pos is not None:
-        heading = math.atan2(north[0], north[1])
-        dx = pos[0] - chaser_pos[0]
-        dy = pos[1] - chaser_pos[1]
-        escape_angle = math.atan2(dx, dy)
+        self.x = 0.0
+        self.y = 0.0
+        self.phi = 0.0
+        self.prev_enc_l = 0.0
+        self.prev_enc_r = 0.0
         
-        error = norm_angle(escape_angle - heading)
-        turn = 3.0 * error
+        for _ in range(10):
+            self.robot.step(TIME_STEP)
+            
+        if self.gps and self.compass:
+            pos = self.gps.getValues()
+            north = self.compass.getValues()
+            self.x = pos[0]
+            self.y = pos[1]
+            self.phi = math.atan2(north[0], north[1])
+            if self.odometry_available:
+                self.prev_enc_l = self.ps_enc_l.getValue()
+                self.prev_enc_r = self.ps_enc_r.getValue()
+
+    def update_odometry(self, dt):
+        if not self.odometry_available:
+            pos = self.gps.getValues()
+            north = self.compass.getValues()
+            self.x = pos[0]
+            self.y = pos[1]
+            self.phi = math.atan2(north[0], north[1])
+            return
+
+        curr_l = self.ps_enc_l.getValue()
+        curr_r = self.ps_enc_r.getValue()
+
+        d_l = curr_l - self.prev_enc_l
+        d_r = curr_r - self.prev_enc_r
+
+        dist_l = d_l * R
+        dist_r = d_r * R
+
+        d_center = (dist_l + dist_r) / 2.0
+        d_theta = (dist_r - dist_l) / D
+
+        self.x += d_center * math.cos(self.phi)
+        self.y += d_center * math.sin(self.phi)
+        self.phi += d_theta
+        self.phi = math.atan2(math.sin(self.phi), math.cos(self.phi))
+
+        self.prev_enc_l = curr_l
+        self.prev_enc_r = curr_r
+
+    def update_sensors(self):
+        self.fl_val = self.ds_fl.getValue() if self.ds_fl else 0
+        self.fr_val = self.ds_fr.getValue() if self.ds_fr else 0
         
-        lv = BASE_SPEED + turn
-        rv = BASE_SPEED - turn
+        self.chaser_pos = None
+        while self.receiver.getQueueLength() > 0:
+            msg = self.receiver.getString()
+            if msg:
+                if msg.startswith("CAPTURED:") and msg.split(":")[1] == self.name:
+                    self.captured = True
+                elif not msg.startswith("CAPTURED"):
+                    parts = msg.split(",")
+                    if len(parts) == 3:
+                        try:
+                             self.chaser_pos = (float(parts[0]), float(parts[1]), float(parts[2]))
+                        except: pass
+            self.receiver.nextPacket()
+
+    def check_stuck(self):
+        if self.fl_val > 900 or self.fr_val > 900:
+            self.stuck_counter += 1
+        else:
+            self.stuck_counter = max(0, self.stuck_counter - 1)
         
-        m = max(abs(lv), abs(rv))
+        return self.stuck_counter > 40
+
+    def select_state(self):
+        if self.captured:
+            return "CAPTURED"
+            
+        if self.current_state == STATE_RECOVERY:
+            if self.recovery_timer > 0: return STATE_RECOVERY
+            else:
+                self.stuck_counter = 0
+                return STATE_WANDER
+
+        if self.current_state == STATE_AVOID:
+            if self.avoid_timer > 0: return STATE_AVOID
+
+        if self.check_stuck():
+            self.recovery_timer = 30
+            self.recovery_dir = random.choice([-1, 1])
+            return STATE_RECOVERY
+
+        if self.fl_val > 200 or self.fr_val > 200:
+            self.avoid_timer = random.randint(10, 20)
+            if self.fl_val > self.fr_val:
+                self.avoid_turn = -1 
+            else:
+                self.avoid_turn = 1
+            return STATE_AVOID
+
+        if self.chaser_pos:
+            return STATE_FLEE
+
+        return STATE_WANDER
+
+    def run_state(self):
+        if self.captured:
+            self.left_motor.setVelocity(0)
+            self.right_motor.setVelocity(0)
+            return
+
+        left_speed = 0
+        right_speed = 0
+
+        if self.current_state == STATE_RECOVERY:
+            self.recovery_timer -= 1
+            if self.recovery_timer > 15: 
+                left_speed = MAX_SPEED
+                right_speed = MAX_SPEED
+            else:
+                left_speed = -MAX_SPEED * self.recovery_dir
+                right_speed = MAX_SPEED * self.recovery_dir
+
+        elif self.current_state == STATE_AVOID:
+            self.avoid_timer -= 1
+            
+            if self.avoid_turn > 0: # Left
+                left_speed = MAX_SPEED
+                right_speed = -MAX_SPEED
+            else: # Right
+                left_speed = -MAX_SPEED
+                right_speed = MAX_SPEED
+                
+            if self.fl_val > 600 or self.fr_val > 600:
+                left_speed = MAX_SPEED
+                right_speed = MAX_SPEED
+
+        elif self.current_state == STATE_FLEE:
+            dx = self.x - self.chaser_pos[0]
+            dy = self.y - self.chaser_pos[1]
+            target_angle = math.atan2(dy, dx)
+            
+            error = target_angle - self.phi
+            while error > math.pi: error -= 2*math.pi
+            while error < -math.pi: error += 2*math.pi
+            
+            turn = 3.0 * error
+            left_speed = BASE_SPEED - turn
+            right_speed = BASE_SPEED + turn
+
+        elif self.current_state == STATE_WANDER:
+            if self.wander_timer > 0:
+                self.wander_timer -= 1
+            else:
+                self.wander_timer = random.randint(30, 100)
+                if random.random() < 0.3:
+                    self.wander_turn = random.uniform(-1.5, 1.5)
+                else:
+                    self.wander_turn = 0
+            
+            if self.wander_turn != 0:
+                left_speed = BASE_SPEED - self.wander_turn
+                right_speed = BASE_SPEED + self.wander_turn
+            else:
+                left_speed = BASE_SPEED
+                right_speed = BASE_SPEED
+
+        m = max(abs(left_speed), abs(right_speed))
         if m > MAX_SPEED:
-            lv = lv / m * MAX_SPEED
-            rv = rv / m * MAX_SPEED
-        
-        left_motor.setVelocity(-lv)
-        right_motor.setVelocity(-rv)
-    else:
-        left_motor.setVelocity(-BASE_SPEED)
-        right_motor.setVelocity(-BASE_SPEED)
+            left_speed = left_speed / m * MAX_SPEED
+            right_speed = right_speed / m * MAX_SPEED
+
+        self.left_motor.setVelocity(-left_speed)
+        self.right_motor.setVelocity(-right_speed)
+
+    def run(self):
+        while self.robot.step(TIME_STEP) != -1:
+            dt = TIME_STEP / 1000.0
+            
+            self.update_sensors()
+            self.update_odometry(dt)
+            
+            self.current_state = self.select_state()
+            self.run_state()
+
+if __name__ == "__main__":
+    bot = RunnerRobot()
+    bot.run()
