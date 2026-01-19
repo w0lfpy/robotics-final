@@ -88,12 +88,12 @@ Each robot is equipped with the following components:
 
 | Component | Type | Quantity | Specification |
 |-----------|------|----------|---------------|
-| Motors | Differential Drive | 2 | Independent left/right actuation |
+| Motors | Rotational Motors | 2 | motor_1 (left), motor_2 (right), maxVelocity: 20 rad/s |
 | GPS | Global Positioning | 1 | Position estimation fallback |
 | Compass | Orientation Sensor | 1 | Heading measurement |
-| Infrared Sensors | Distance Measurement | 2 | Front-facing obstacle detection |
-| Wheel Encoders | Position Sensors | 2 | Odometry calculation |
-| Wireless Transceiver | Communication | 1 | Inter-agent messaging |
+| Distance Sensors | Infra-red | 2 | ds_front_left, ds_front_right, range: 0-0.2m |
+| Wheel Encoders | Position Sensors | 2 | ps_1 (left), ps_2 (right) for odometry |
+| Receiver | Wireless | 1 | Inter-agent messaging (channel-based) |
 
 ### Physical Parameters
 
@@ -126,9 +126,9 @@ Maximum Speed:    Variable by agent type
 
 | Parameter | Value |
 |-----------|-------|
-| Maximum Speed | 9.0 rad/s |
-| Base Speed | 7.0 rad/s |
-| Proportional Gain | 3.5 |
+| Maximum Speed | 18.0 rad/s |
+| Base Speed | 14.0 rad/s |
+| Proportional Gain | 3.0 |
 
 **Behavioral States**:
 
@@ -136,6 +136,7 @@ Maximum Speed:    Variable by agent type
 - **CHASE**: Pursues nearest runner using proportional heading control
 - **AVOID**: Performs committed obstacle avoidance maneuvers
 - **RECOVERY**: Activates stuck detection and escape sequences
+- **CLEAR**: Clears obstacle area after avoidance maneuver
 
 **Key Capabilities**:
 - Differential odometry with GPS fallback for position tracking
@@ -158,11 +159,10 @@ Maximum Speed:    Variable by agent type
 **Behavioral States**:
 
 - **WANDER**: Executes exploratory random movement patterns
-- **FLEE**: Computes escape vectors opposite to hunter position
 - **AVOID**: Performs reactive obstacle avoidance
 - **RECOVERY**: Activates stuck escape sequences
 
-**# Supervisor System**
+### Supervisor System
 
 **Controller**: [`game_supervisor.py`](controllers/game_supervisor/game_supervisor.py)
 
@@ -172,24 +172,29 @@ The simulation supervisor manages all game logic and state:
 
 | Function | Description |
 |----------|-------------|
-| Position Broadcasting | Real-time agent position transmission |
-| Capture Detection | Distance-based collision detection |
-| Time Management | Game timer and bonus time allocation |
+| Position Broadcasting | Real-time agent position transmission via channels |
+| Capture Detection | Distance-based collision detection (0.12m threshold) |
+| Time Management | Game timer and bonus time allocation (+30s per capture) |
 | Victory Evaluation | Win/loss condition assessment |
-| HUD Display | On-screen time remaining and capture count |
-| Agent Lifecycle | Robot removal upon capture |
+| HUD Display | On-screen time remaining and prey count display |
+| Agent Lifecycle | Robot node removal upon capture |
+| Simulation Control | Pause simulation when game ends |
 
 **Communication Architecture**:
 
 | Channel | Direction | Payload |
 |---------|-----------|---------|
-| Channel 1 | Supervisor → Runners | Hunter position |
-| Channel 2 | Supervisor → Hunter | Runner positions |
+| Channel 1 | Supervisor → Runners | Hunter position and capture notifications |
+| Channel 2 | Supervisor → Hunter | All active runner positions |
 
 **Features**:
-- Receives hunter position via wireless communication
+- Receives hunter position and capture notifications via wireless communication
 - Stops movement when captured
-- Lower speed than hunter (asymmetric gameplaydead reckoning with the following kinematic model:
+- Lower speed than hunter (asymmetric gameplay)
+
+### Odometry Integration
+
+Both hunter and runner robots implement differential odometry-based dead reckoning with the following kinematic model:
 
 ```python
 # Compute linear and angular displacement
@@ -218,10 +223,14 @@ RECOVERY (highest priority)
     ↓
 AVOID
     ↓
-CHASE/FLEE
+CLEAR (Hunter only)
+    ↓
+CHASE
     ↓
 SEARCH/WANDER (lowest priority)
-```Installation & Setup
+```
+
+## Installation & Setup
 
 ### Prerequisites
 
@@ -240,7 +249,17 @@ SEARCH/WANDER (lowest priority)
    ```
 
 2. **Clone Repository**:
-  # Arena Layout
+   ```bash
+   git clone <repository-url>
+   cd robotics-final
+   ```
+
+3. **Open Simulation**:
+   - Launch Webots
+   - Open [`worlds/tarea_final.wbt`](worlds/tarea_final.wbt)
+   - Click the play button to start the simulation
+
+## Arena Layout
 
 The simulation environment features:
 
@@ -266,32 +285,35 @@ All key parameters can be adjusted in their respective controller files:
 #### Game Supervisor ([`game_supervisor.py`](controllers/game_supervisor/game_supervisor.py))
 
 ```python
-GAME_DURATION = 120        # Base game time (seconds)
-TIME_BONUS = 30            # Bonus per capture (seconds)
+GAME_DURATION = 120.0      # Base game time (seconds)
+TIME_BONUS = 30.0          # Bonus per capture (seconds)
 CAPTURE_DISTANCE = 0.12    # Capture threshold (meters)
 ```
 
 #### Hunter Controller ([`chaser_controller.py`](controllers/chaser_controller/chaser_controller.py))
 
 ```python
-MAX_SPEED = 9.0           # Maximum angular velocity (rad/s)
-BASE_SPEED = 7.0          # Cruising angular velocity (rad/s)
-PROPORTIONAL_GAIN = 3.5   # Heading control gain
+MAX_SPEED = 18.0           # Maximum angular velocity (rad/s)
+BASE_SPEED = 14.0          # Cruising angular velocity (rad/s)
+TURN_GAIN_CHASE = 3.0      # Heading control gain
+MAX_ACCEL = 0.8            # Max wheel speed change per step
 ```
 
 #### Runner Controller ([`target_controller.py`](controllers/target_controller/target_controller.py))
 
 ```python
-MAX_SPEED = 6.0           # Maximum angular velocity (rad/s)
-BASE_SPEED = 5.0          # Cruising angular velocity (rad/s)
+MAX_SPEED = 6.0            # Maximum angular velocity (rad/s)
+BASE_SPEED = 5.0           # Cruising angular velocity (rad/s)
+MAX_ACCEL = 0.7            # Max wheel speed change per step
 ```
 
 ### Performance Tuning
 
 To modify gameplay balance:
-- **Increase difficulty**: Reduce runner speed or increase hunter speed
-- **Decrease difficulty**: Increase time bonus or base duration
-- **Adjust responsiveness**: Modify proportional gains in controllers
+- **Increase difficulty**: Reduce runner MAX_SPEED (currently 6.0) or increase hunter MAX_SPEED (currently 18.0)
+- **Decrease difficulty**: Increase TIME_BONUS (currently 30.0s) or GAME_DURATION (currently 120.0s)
+- **Adjust responsiveness**: Modify TURN_GAIN_CHASE (currently 3.0) or MAX_ACCEL values (0.8 hunter, 0.7 runner)
+- **Adjust capture sensitivity**: Modify CAPTURE_DISTANCE (currently 0.12m)
 
 ## Known Limitations
 
@@ -299,10 +321,11 @@ The following behaviors are expected within the current implementation:
 
 | Behavior | Cause | Mitigation |
 |----------|-------|------------|
-| Corner entrapment | Local minima in potential field | Recovery state with timeout |
-| Oscillatory avoidance | Sensor noise near obstacles | State commitment timers |
-| Suboptimal paths | Greedy target selection | Acceptable for reactive behavior |
-| No path planning | Computational complexity | Direct vector navigation used |
+| Corner entrapment | Local minima during collision avoidance | Recovery state with 30-step timeout and random direction |
+| Oscillatory avoidance | Reactive behavior near obstacles | State commitment timers (12 steps avoid, 10 steps clear) |
+| Suboptimal paths | Greedy nearest-target selection | Acceptable for reactive chase behavior |
+| No path planning | Real-time reactive control approach | Direct heading-based navigation with proportional control |
+| Stuck detection delay | Counter-based accumulation | 40-step threshold before recovery activation |
 
 ## Contributing
 
@@ -328,65 +351,3 @@ Contributions are welcome! Please follow these guidelines:
 - All team members for their contributions
 
 ---
-
-### State Machine Architecture
-
-Controllers use discrete state machines with:
-- Timer-based state commitment to prevent oscillation
-- Priority-based state transitions
-- Obstacle detection thresholds calibrated for arena
-
-### Control Law
-
-Proportional control for heading:
-
-```
-error = target_angle - current_angle
-turn_effort = gain * error
-left_speed = base_speed - turn_effort
-right_speed = base_speed + turn_effort
-```
-
-Speed normalization prevents exceeding motor limits.
-
-## Requirements
-
-- Webots R2025a or compatible version
-- Python 3.x
-- Webots Python API
-
-## Running the Simulation
-
-1. Open Webots
-2. Load world file: `worlds/tarea_final.wbt`
-3. Click play to start simulation
-4. Monitor display for game status and remaining time
-
-## Arena Layout
-
-The simulation world includes:
-
-- Rectangular arena with perimeter walls (height: 0.15m)
-- 4 cylindrical pillars (radius: 0.04m, height: 0.15m)
-- 5 internal wall segments for navigation complexity
-- 2 box obstacles (0.12-0.15m dimensions)
-- Textured grass floor with tile pattern
-
-Initial positions are strategically distributed to ensure fair gameplay.
-
-## Configuration Parameters
-
-Key parameters can be adjusted in respective files:
-
-**game_supervisor.py**:
-- `GAME_DURATION`: Base game time (seconds)
-- `TIME_BONUS`: Bonus per capture (seconds)
-- `CAPTURE_DISTANCE`: Capture threshold (meters)
-
-**chaser_controller.py**:
-- `MAX_SPEED`: Hunter maximum velocity
-- `BASE_SPEED`: Hunter cruising velocity
-
-**target_controller.py**:
-- `MAX_SPEED`: Runner maximum velocity
-- `BASE_SPEED`: Runner cruising velocity
