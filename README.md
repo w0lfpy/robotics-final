@@ -22,6 +22,8 @@
 
 This project demonstrates advanced autonomous robotics concepts through a competitive tag game scenario. The simulation features one hunter robot pursuing three runner robots within a constrained arena environment. The implementation showcases real-time decision-making, sensor fusion, inter-agent communication, and reactive behaviors essential for multi-agent robotic systems.
 
+![Simulation Overview](screenshoots/image4.png)
+
 ## Features
 
 - **State Machine Controllers**: Robust finite state machines for both hunter and runner agents
@@ -102,13 +104,23 @@ Body Radius:      0.035 m
 Maximum Speed:    Variable by agent type
 ```
 
-- **Differential Drive** : Two independent motors (motor_1, motor_2)
-- **Sensors**:
-  - GPS for global positioning
-  - Compass for orientation
-  - 2x Front infrared distance sensors
-  - 2x Position sensors (encoders) for odometry
-- **Communication**: [`chaser_controller.py`](controllers/chaser_controller/chaser_controller.py)
+## Robot Specifications
+
+### Component Configuration
+
+**Sensors and Actuators**:
+- **Differential Drive**: Two independent motors (motor_1, motor_2)
+- **GPS**: Global positioning for position estimation fallback
+- **Compass**: Orientation sensor for heading measurement
+- **Infrared Sensors**: 2x front-facing distance sensors for obstacle detection
+- **Wheel Encoders**: 2x position sensors for odometry calculation
+- **Wireless Transceiver**: Inter-agent messaging and communication
+
+### Hunter Robot (Chaser)
+
+**Controller**: [`chaser_controller.py`](controllers/chaser_controller/chaser_controller.py)
+
+![Hunter Robot](screenshoots/image2.png)
 
 **Performance Profile**:
 
@@ -127,7 +139,13 @@ Maximum Speed:    Variable by agent type
 
 **Key Capabilities**:
 - Differential odometry with GPS fallback for position tracking
-- Timeout-based [`target_controller.py`](controllers/target_controller/target_controller.py)
+- Timeout-based recovery mechanisms
+
+### Runner Robots (Targets)
+
+**Controller**: [`target_controller.py`](controllers/target_controller/target_controller.py)
+
+![Runner Robot](screenshoots/image3.png)
 
 **Performance Profile**:
 
@@ -144,7 +162,7 @@ Maximum Speed:    Variable by agent type
 - **AVOID**: Performs reactive obstacle avoidance
 - **RECOVERY**: Activates stuck escape sequences
 
-**# Supervisor System
+**# Supervisor System**
 
 **Controller**: [`game_supervisor.py`](controllers/game_supervisor/game_supervisor.py)
 
@@ -236,6 +254,8 @@ The simulation environment features:
 | Floor Texture | Tiled grass pattern | 1 |
 
 **Initial Positions**: Robot spawn points are strategically distributed to ensure balanced gameplay.
+
+![Arena Layout](screenshoots/image1.png)
 
 ## Configuration
 
