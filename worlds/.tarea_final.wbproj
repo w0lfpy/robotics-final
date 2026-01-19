@@ -5,7 +5,7 @@ sceneTreePerspectives: 000000ff000000010000000300000026000000c0000000fa010000000
 maximizedDockId: -1
 centralWidgetVisible: 1
 orthographicViewHeight: 1
-textFiles: 0 "../final_robotica/protos/TagBot.proto"
+textFiles: 0 "protos/TagBot.proto"
 globalOptionalRendering: CoordinateSystem
 consoles: Console:All:All
 renderingDevicePerspectives: SUPERVISOR:display;1;1;0;0

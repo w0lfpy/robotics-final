@@ -57,6 +57,7 @@ PROTO TagBot [
         device [
           RotationalMotor {
             name "motor_1"
+            maxVelocity 20
           }
         ]
         endPoint Solid {
@@ -88,6 +89,7 @@ PROTO TagBot [
         device [
           RotationalMotor {
             name "motor_2"
+            maxVelocity 20
           }
         ]
         endPoint Solid {

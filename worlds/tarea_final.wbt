@@ -346,6 +346,7 @@ DEF RUNNER_1 Robot {
       device [
         RotationalMotor {
           name "motor_1"
+          maxVelocity 20
         }
         PositionSensor {
           name "ps_1"
@@ -381,6 +382,7 @@ DEF RUNNER_1 Robot {
       device [
         RotationalMotor {
           name "motor_2"
+          maxVelocity 20
         }
         PositionSensor {
           name "ps_2"
@@ -484,6 +486,7 @@ DEF RUNNER_2 Robot {
       device [
         RotationalMotor {
           name "motor_1"
+          maxVelocity 20
         }
         PositionSensor {
           name "ps_1"
@@ -519,6 +522,7 @@ DEF RUNNER_2 Robot {
       device [
         RotationalMotor {
           name "motor_2"
+          maxVelocity 20
         }
         PositionSensor {
           name "ps_2"
@@ -758,6 +762,7 @@ DEF HUNTER Robot {
       device [
         RotationalMotor {
           name "motor_1"
+          maxVelocity 20
         }
         PositionSensor {
           name "ps_1"
@@ -793,6 +798,7 @@ DEF HUNTER Robot {
       device [
         RotationalMotor {
           name "motor_2"
+          maxVelocity 20
         }
         PositionSensor {
           name "ps_2"

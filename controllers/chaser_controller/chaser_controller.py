@@ -7,11 +7,11 @@ import math
 import random
 
 TIME_STEP = 32
-MAX_SPEED = 9.0
-BASE_SPEED = 7.0
+MAX_SPEED = 18.0
+BASE_SPEED = 14.0
 MAX_ACCEL = 0.8  # Max wheel speed change per step for smoother motion
 TURN_GAIN_CHASE = 3.0
-MIN_CHASE_SPEED = 3.5
+MIN_CHASE_SPEED = 7.0
 AVOID_BASE = 0.5
 
 R = 0.025
