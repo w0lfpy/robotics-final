@@ -122,12 +122,12 @@ while supervisor.step(TIME_STEP) != -1:
             emitter.send(f"CAPTURED:{RUNNER_NAMES[idx]}".encode("utf-8"))
     
     # 3. ENVIAR A HUNTER (Channel 2)
-    # Formato: "X1,Y1,Z1;X2,Y2,Z2..."
+    # Formato: "NAME,X,Y,Z;NAME,X,Y,Z..."
     emitter.setChannel(2)
     active_str = []
-    for pos in runner_positions:
+    for name, pos in zip(RUNNER_NAMES, runner_positions):
         if pos is not None:
-            active_str.append(f"{pos[0]},{pos[1]},{pos[2]}")
+            active_str.append(f"{name},{pos[0]},{pos[1]},{pos[2]}")
     if active_str:
         emitter.send(";".join(active_str).encode("utf-8"))
     

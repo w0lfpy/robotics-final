@@ -9,6 +9,10 @@ import random
 TIME_STEP = 32
 MAX_SPEED = 9.0
 BASE_SPEED = 7.0
+MAX_ACCEL = 0.8  # Max wheel speed change per step for smoother motion
+TURN_GAIN_CHASE = 3.0
+MIN_CHASE_SPEED = 3.5
+AVOID_BASE = 0.5
 
 R = 0.025
 D = 0.09
@@ -17,6 +21,7 @@ STATE_SEARCH = "SEARCH"
 STATE_CHASE = "CHASE"
 STATE_AVOID = "AVOID"
 STATE_RECOVERY = "RECOVERY"
+STATE_CLEAR = "CLEAR"
 
 class ChaserRobot:
     def __init__(self):
@@ -53,14 +58,18 @@ class ChaserRobot:
         self.receiver.enable(TIME_STEP)
 
         self.current_state = STATE_SEARCH
-        self.runners = []
+        self.runners = {}
         self.stuck_counter = 0
         self.recovery_timer = 0
         self.recovery_dir = 1
         self.avoid_timer = 0    # Timer for avoidance maneuver
-        self.avoid_turn = 0     # Turn magnitude for avoidance
-        self.wander_timer = 0
-        self.wander_turn = 0
+        self.avoid_dir = 1
+        self.clear_timer = 0
+        self.clear_dir = 1
+        self.left_speed = 0.0
+        self.right_speed = 0.0
+        self.goal_pos = None
+        self.goal_name = None
 
         self.x = 0.0
         self.y = 0.0
@@ -80,6 +89,26 @@ class ChaserRobot:
             if self.odometry_available:
                 self.prev_enc_l = self.ps_enc_l.getValue()
                 self.prev_enc_r = self.ps_enc_r.getValue()
+
+    def ramp_speed(self, current, target, max_delta):
+        delta = target - current
+        if delta > max_delta:
+            delta = max_delta
+        elif delta < -max_delta:
+            delta = -max_delta
+        return current + delta
+
+    def apply_wheel_speeds(self, left_target, right_target):
+        m = max(abs(left_target), abs(right_target))
+        if m > MAX_SPEED:
+            left_target = left_target / m * MAX_SPEED
+            right_target = right_target / m * MAX_SPEED
+
+        self.left_speed = self.ramp_speed(self.left_speed, left_target, MAX_ACCEL)
+        self.right_speed = self.ramp_speed(self.right_speed, right_target, MAX_ACCEL)
+
+        self.left_motor.setVelocity(-self.left_speed)
+        self.right_motor.setVelocity(-self.right_speed)
 
     def update_odometry(self, dt):
         if not self.odometry_available:
@@ -114,17 +143,33 @@ class ChaserRobot:
         self.fl_val = self.ds_fl.getValue() if self.ds_fl else 0
         self.fr_val = self.ds_fr.getValue() if self.ds_fr else 0
         
-        self.runners = []
+        self.runners = {}
         while self.receiver.getQueueLength() > 0:
             msg = self.receiver.getString()
             if msg and not msg.startswith("CAPTURED"):
-                 for part in msg.split(";"):
+                for part in msg.split(";"):
                     coords = part.split(",")
-                    if len(coords) == 3:
+                    if len(coords) == 4:
                         try:
-                            self.runners.append((float(coords[0]), float(coords[1]), float(coords[2])))
+                            name = coords[0]
+                            self.runners[name] = (float(coords[1]), float(coords[2]), float(coords[3]))
                         except: pass
             self.receiver.nextPacket()
+
+    def select_goal(self):
+        if not self.runners:
+            return None
+
+        if self.goal_name in self.runners:
+            return self.goal_name, self.runners[self.goal_name]
+
+        current_pos = (self.x, self.y)
+        best_name = min(
+            self.runners.keys(),
+            key=lambda name: (self.runners[name][0] - current_pos[0])**2 +
+                             (self.runners[name][1] - current_pos[1])**2
+        )
+        return best_name, self.runners[best_name]
 
     def check_stuck(self):
         if self.fl_val > 900 or self.fr_val > 900:
@@ -147,6 +192,8 @@ class ChaserRobot:
         if self.current_state == STATE_AVOID:
             if self.avoid_timer > 0: return STATE_AVOID
             # else fall through to re-evaluate
+        if self.current_state == STATE_CLEAR:
+            if self.clear_timer > 0: return STATE_CLEAR
 
         if self.check_stuck():
             self.recovery_timer = 30
@@ -155,16 +202,11 @@ class ChaserRobot:
 
         if self.fl_val > 300 or self.fr_val > 300:
             # Initialize Avoidance
-            self.avoid_timer = random.randint(10, 25) # Commit to avoid for X steps
-            # Random direction but biased away from obstacle
-            if self.fl_val > self.fr_val:
-                self.avoid_turn = -1 # Right
-            else:
-                self.avoid_turn = 1 # Left
-            
-            # Add randomness to direction (sometimes wrong way to just break patterns?)
-            # No, keep it rational but maybe vary magnitude?
+            self.avoid_timer = 12
+            self.avoid_dir = -1 if self.fl_val > self.fr_val else 1
             return STATE_AVOID
+        if self.clear_timer > 0:
+            return STATE_CLEAR
 
         if self.runners:
             return STATE_CHASE
@@ -177,74 +219,71 @@ class ChaserRobot:
 
         if self.current_state == STATE_RECOVERY:
             self.recovery_timer -= 1
-            if self.recovery_timer > 15: 
-                left_speed = MAX_SPEED
-                right_speed = MAX_SPEED
+            if self.recovery_timer > 15:
+                left_speed = -0.6 * MAX_SPEED
+                right_speed = -0.6 * MAX_SPEED
             else:
-                left_speed = -MAX_SPEED * self.recovery_dir
-                right_speed = MAX_SPEED * self.recovery_dir
+                curve = 0.6 * MAX_SPEED * self.recovery_dir
+                left_speed = -0.4 * MAX_SPEED - curve
+                right_speed = -0.4 * MAX_SPEED + curve
 
         elif self.current_state == STATE_AVOID:
             self.avoid_timer -= 1
-            # Perform a sharp turn
-            # To turn effectively with differential drive: one forward, one back (spin)
-            # or one stop, one fast.
-            
-            # Spin in place or tight curve
-            turn_speed = MAX_SPEED
-            
-            if self.avoid_turn > 0: # Turn Left
-                left_speed = MAX_SPEED
-                right_speed = -MAX_SPEED 
-            else: # Turn Right
-                left_speed = -MAX_SPEED 
-                right_speed = MAX_SPEED
+            if self.avoid_timer > 6:
+                # Back up to break contact with obstacle
+                left_speed = -0.6 * MAX_SPEED
+                right_speed = -0.6 * MAX_SPEED
+            else:
+                # Turn away to clear the obstacle
+                turn = 0.8 * MAX_SPEED * self.avoid_dir
+                left_speed = -turn
+                right_speed = turn
+                self.clear_timer = 10
+                self.clear_dir = self.avoid_dir
                 
             # If obstacle still VERY Close, maybe keep backing up?
             if self.fl_val > 800 or self.fr_val > 800:
-                 left_speed = MAX_SPEED
-                 right_speed = MAX_SPEED
+                 left_speed = -0.5 * MAX_SPEED
+                 right_speed = -0.5 * MAX_SPEED
+        elif self.current_state == STATE_CLEAR:
+            self.clear_timer -= 1
+            curve = 0.4 * MAX_SPEED * self.clear_dir
+            left_speed = 0.6 * MAX_SPEED - curve
+            right_speed = 0.6 * MAX_SPEED + curve
 
         elif self.current_state == STATE_CHASE:
             current_pos = (self.x, self.y)
-            closest = min(self.runners, key=lambda r: (r[0]-current_pos[0])**2 + (r[1]-current_pos[1])**2)
+            goal = self.select_goal()
+            if goal is None:
+                left_speed = BASE_SPEED
+                right_speed = BASE_SPEED
+                self.apply_wheel_speeds(left_speed, right_speed)
+                return
+
+            self.goal_name, self.goal_pos = goal
             
-            dx = closest[0] - current_pos[0]
-            dy = closest[1] - current_pos[1]
+            dx = self.goal_pos[0] - current_pos[0]
+            dy = self.goal_pos[1] - current_pos[1]
             target_phi = math.atan2(dy, dx)
             
             error = target_phi - self.phi
             while error > math.pi: error -= 2*math.pi
             while error < -math.pi: error += 2*math.pi
             
-            turn = 3.5 * error
-            left_speed = BASE_SPEED - turn
-            right_speed = BASE_SPEED + turn
+            dist = math.hypot(dx, dy)
+            turn = TURN_GAIN_CHASE * error
+            turn = max(-0.8 * MAX_SPEED, min(0.8 * MAX_SPEED, turn))
+            heading_scale = 0.5 + 0.5 * max(0.0, 1.0 - abs(error) / math.pi)
+            forward = BASE_SPEED + min(2.0, dist * 2.0)
+            forward = max(MIN_CHASE_SPEED, min(MAX_SPEED, forward * heading_scale))
+            left_speed = forward - turn
+            right_speed = forward + turn
 
         elif self.current_state == STATE_SEARCH:
-            if self.wander_timer > 0:
-                self.wander_timer -= 1
-            else:
-                self.wander_timer = random.randint(30, 100)
-                if random.random() < 0.3:
-                    self.wander_turn = random.uniform(-2.0, 2.0)
-                else:
-                    self.wander_turn = 0
-            
-            if self.wander_turn != 0:
-                left_speed = BASE_SPEED - self.wander_turn
-                right_speed = BASE_SPEED + self.wander_turn
-            else:
-                left_speed = BASE_SPEED
-                right_speed = BASE_SPEED
+            left_speed = BASE_SPEED
+            right_speed = BASE_SPEED
 
-        m = max(abs(left_speed), abs(right_speed))
-        if m > MAX_SPEED:
-            left_speed = left_speed / m * MAX_SPEED
-            right_speed = right_speed / m * MAX_SPEED
-
-        self.left_motor.setVelocity(-left_speed)
-        self.right_motor.setVelocity(-right_speed)
+        self.apply_wheel_speeds(left_speed, right_speed)
 
     def run(self):
         while self.robot.step(TIME_STEP) != -1:
